@@ -48,14 +48,22 @@ public class ReportController {
     }
 
     /**
-     * HU-09/HU-10: GET /api/reports?q=&page=&size=
+     * HU-09/HU-10/HU-11/HU-12/HU-13: GET /api/reports?q=&categorias=&tipo=&lugar=&start_date=&end_date=&page=&size=&sort=
      */
     @GetMapping
     public ResponseEntity<Page<ReportResponse>> getReports(
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) List<Long> categorias,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String lugar,
+            @RequestParam(required = false, name = "start_date") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(required = false, name = "end_date") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(reportService.getReports(q, page, size));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "desc") String sort) {
+        return ResponseEntity.ok(reportService.getReports(
+                q, categorias, tipo, lugar, startDate, endDate, page, size, sort
+        ));
     }
 
     /**

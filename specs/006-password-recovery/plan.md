@@ -122,3 +122,15 @@ frontend/
 | POST | `/api/auth/forgot-password` | HU-05 | Generar token de recuperación y enviar correo/logs |
 | POST | `/api/auth/reset-password` | HU-05 | Restablecer contraseña si el token es válido y no expiró |
 
+---
+
+## 9. Pruebas Unitarias y de Integración Automatizadas
+
+### Pruebas Unitarias (`AuthServiceTest.java`)
+- **`forgotPassword_Success`**: Verifica la generación de un token UUID único, asignación de 15 minutos de expiración en la entidad `Usuario`, y su correcta persistencia.
+- **`resetPassword_Success`**: Verifica el restablecimiento exitoso de contraseña con un token válido y no expirado, actualizando el hash y limpiando el token de la base de datos.
+
+### Pruebas de Integración (`AuthControllerIntegrationTest.java`)
+- **`POST /api/auth/forgot-password` (Exitoso)**: Envía solicitud HTTP con correo válido y verifica respuesta `200 OK` con las instrucciones de recuperación.
+- **`POST /api/auth/reset-password` (Exitoso)**: Simula restablecimiento de clave mediante token válido y confirma la actualización de seguridad del usuario.
+

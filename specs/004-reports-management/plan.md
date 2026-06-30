@@ -160,3 +160,19 @@ frontend/
 | POST | `/api/reports/{id}/images` | HU-08 | Subir imágenes a Cloudinary (máx. 3) |
 | GET | `/api/reports/mine` | Soporte | Listar reportes del usuario autenticado |
 | DELETE | `/api/reports/{id}` | Soporte | Eliminar reporte propio |
+
+---
+
+## 9. Pruebas Unitarias y de Integración Automatizadas
+
+### Pruebas Unitarias (`ReportServiceTest.java`)
+- **`createReport_Success`**: Valida que al enviar datos válidos se cree y guarde el reporte asignándole el usuario, categoría y estado `ACTIVO`.
+- **`createReport_InvalidTipo_ThrowsException`**: Valida que arroje una excepción si el tipo no es `PERDIDO` o `ENCONTRADO`.
+- **`uploadImages_Success`**: Verifica la subida física simulada de fotos con Cloudinary y su asociación correcta en base de datos.
+- **`uploadImages_TooManyImages_ThrowsException`**: Asegura el cumplimiento de la regla de negocio que limita las imágenes a un máximo de 3 por reporte.
+- **`deleteReport_Success`**: Comprueba que al eliminar un reporte se eliminen también sus imágenes asociadas tanto de la base de datos como de Cloudinary.
+- **`deleteReport_UnauthorizedUser_ThrowsException`**: Valida que un usuario no pueda eliminar los reportes de otros usuarios.
+
+### Pruebas de Integración (`ReportControllerIntegrationTest.java`)
+- **`POST /api/reports` (Exitoso)**: Envía una petición autenticada de creación de reporte y valida estatus `201 Created` con los datos en formato JSON.
+- **`DELETE /api/reports/{id}` (Exitoso)**: Ejecuta una petición HTTP para borrar un reporte propio y confirma que retorne un estatus `200 OK` con un mensaje de éxito.

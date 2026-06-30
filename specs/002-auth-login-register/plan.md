@@ -169,3 +169,19 @@ frontend/
 
 ### HU-03: Cierre de Sesión
 El cierre de sesión se maneja exclusivamente en el frontend (destrucción del token JWT en Zustand y redirección a `/login`). No requiere endpoint backend ya que la autenticación es stateless con JWT.
+
+---
+
+## 9. Pruebas Unitarias y de Integración Automatizadas
+
+### Pruebas Unitarias (`AuthServiceTest.java`)
+- **`register_Success`**: Verifica la creación de usuario exitosa con contraseña encriptada, guardado en base de datos y generación de token.
+- **`register_DuplicateEmail_ThrowsException`**: Valida que el sistema arroje una excepción si el correo ya existe.
+- **`login_Success`**: Verifica el inicio de sesión correcto con credenciales válidas y generación de JWT.
+- **`login_WrongPassword_ThrowsException`**: Valida el rechazo de credenciales con contraseña inválida.
+
+### Pruebas de Integración (`AuthControllerIntegrationTest.java`)
+- **`POST /api/auth/register` (Exitoso)**: Ejecuta flujo HTTP completo y verifica respuesta `201 Created` con JSON de usuario y token.
+- **`POST /api/auth/register` (Duplicado)**: Verifica respuesta `400 Bad Request` y mensaje de error descriptivo ante correo duplicado.
+- **`POST /api/auth/login` (Exitoso)**: Simula login exitoso y comprueba estatus `200 OK`.
+- **`POST /api/auth/login` (Credenciales Inválidas)**: Valida respuesta `400 Bad Request` con mensaje de error pertinente.

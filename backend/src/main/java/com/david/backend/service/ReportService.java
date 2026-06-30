@@ -91,14 +91,46 @@ public class ReportService {
      * HU-10: Búsqueda por palabras clave
      */
     public Page<ReportResponse> getReports(String query, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<Reporte> reportes;
+        return getReports(query, null, null, null, null, null, page, size, "desc");
+    }
 
-        if (query != null && !query.isBlank()) {
-            reportes = reporteRepository.buscarPorPalabraClave(query.trim(), pageable);
-        } else {
-            reportes = reporteRepository.findAllByOrderByCreatedAtDesc(pageable);
+    /**
+     * HU-11, HU-12, HU-13: Obtener reportes filtrados y ordenados
+     */
+    public Page<ReportResponse> getReports(
+            String query,
+            List<Long> categoriaIds,
+            String tipo,
+            String lugar,
+            java.time.LocalDate startDate,
+            java.time.LocalDate endDate,
+            int page,
+            int size,
+            String sortDirection
+    ) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new RuntimeException("La fecha de inicio debe ser anterior o igual a la fecha de fin.");
         }
+
+        List<Long> cats = (categoriaIds != null && !categoriaIds.isEmpty()) ? categoriaIds : null;
+
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by("createdAt");
+        if ("asc".equalsIgnoreCase(sortDirection)) {
+            sort = sort.ascending();
+        } else {
+            sort = sort.descending();
+        }
+
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Reporte> reportes = reporteRepository.filterReports(
+                (query != null && !query.isBlank()) ? query.trim() : null,
+                cats,
+                (tipo != null && !tipo.isBlank()) ? tipo.toUpperCase().trim() : null,
+                (lugar != null && !lugar.isBlank()) ? lugar.trim() : null,
+                startDate,
+                endDate,
+                pageable
+        );
 
         return reportes.map(ReportResponse::fromEntity);
     }

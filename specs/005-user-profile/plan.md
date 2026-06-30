@@ -128,3 +128,19 @@ frontend/
 | PUT | `/api/users/me` | HU-04 | Actualizar nombre y foto de perfil |
 | POST | `/api/users/me/avatar` | HU-04 | Subir avatar a Cloudinary |
 | PUT | `/api/users/me/password` | HU-04 | Cambiar contraseña (actual + nueva) |
+
+---
+
+## 9. Pruebas Unitarias y de Integración Automatizadas
+
+### Pruebas Unitarias (`UserServiceTest.java`)
+- **`getProfile_Success`**: Verifica la correcta proyección del usuario en un DTO seguro (`UserResponse`).
+- **`updateProfile_Success`**: Comprueba la actualización del nombre y la URL del avatar en la entidad, confirmando su persistencia.
+- **`uploadAvatar_Success`**: Simula la subida de un archivo multipart a Cloudinary y verifica que la URL segura devuelta se asocie al usuario.
+- **`changePassword_Success`**: Verifica el flujo correcto de cambio de contraseña validando la clave actual y encriptando la nueva.
+- **`changePassword_WrongCurrentPassword_ThrowsException`**: Valida que se rechace el cambio si la contraseña actual proporcionada es incorrecta.
+
+### Pruebas de Integración (`UserControllerIntegrationTest.java`)
+- **`GET /api/users/me` (Autenticado)**: Envía una petición con token JWT válido y comprueba estatus `200 OK` con los datos del usuario en JSON.
+- **`GET /api/users/me` (No Autenticado)**: Envía una petición sin cabecera y verifica que Spring Security retorne `403 Forbidden`.
+- **`PUT /api/users/me` (Exitoso)**: Ejecuta una actualización de perfil autenticada y valida la persistencia del nuevo nombre y avatar con estatus `200 OK`.
