@@ -80,21 +80,22 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (MANDATORY per Constitution) ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Unit tests for [Service] (JUnit 5 + Mockito) in src/test/java/...
+- [ ] T011 [P] [US1] Integration tests for [Controller] (MockMvc) in src/test/java/...
+- [ ] T012 [P] [US1] Verify JaCoCo coverage >= 95% for story modules
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T013 [P] [US1] Create [Entity] in src/main/java/com/david/backend/models/
+- [ ] T014 [P] [US1] Create [Repository] in src/main/java/com/david/backend/repositories/
+- [ ] T015 [US1] Implement [Service] logic in src/main/java/com/david/backend/services/
+- [ ] T016 [US1] Implement [Controller] REST endpoint in src/main/java/com/david/backend/controllers/
+- [ ] T017 [US1] Integrate with Cloudinary for media handling (if applicable)
+- [ ] T018 [US1] Apply Spring Security / JWT annotations/rules
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 

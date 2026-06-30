@@ -40,7 +40,13 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **I. Decoupled Architecture**: Does this feature maintain the Spring Boot 4 / React 19 separation?
+- [ ] **II. Service Testing Rigor**: Are JUnit 5 and Mockito unit tests planned for all new services?
+- [ ] **III. Quality Gates**: Will this implementation support the 95% JaCoCo coverage requirement?
+- [ ] **IV. REST Integration Testing**: Are Spring Boot Test/MockMvc integration tests planned for all new endpoints?
+- [ ] **V. Cloud-Native Storage**: If handling media, is Cloudinary integration used (no local storage)?
+- [ ] **VI. Security-First Auth**: Is JWT/Spring Security/BCrypt used for authentication?
+- [ ] **Agile/SDD**: Is this feature scoped for a 1-week sprint?
 
 ## Project Structure
 

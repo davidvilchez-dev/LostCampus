@@ -1,0 +1,34 @@
+# Gemini / Agent local workspace files
+.gemini/
+.specify/
+
+# Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Frontend Ignores
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/.env
+frontend/.env.*
+frontend/logs/
+frontend/*.log
+
+# Backend Ignores
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.factorypath
+backend/bin/
+backend/*.class
+backend/*.log
+backend/src/main/resources/application.properties

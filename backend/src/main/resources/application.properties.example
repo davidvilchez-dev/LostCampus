@@ -1,0 +1,36 @@
+spring.application.name=backend
+
+# Database configuration
+spring.datasource.url=jdbc:postgresql://localhost:5432/lostcampus_db
+spring.datasource.username=YOUR_DATABASE_USERNAME
+spring.datasource.password=YOUR_DATABASE_PASSWORD
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+
+# JWT Configuration
+# Generate a 256-bit key
+application.security.jwt.secret-key=YOUR_JWT_SECRET_KEY
+application.security.jwt.expiration=86400000
+
+# Cloudinary Configuration
+cloudinary.cloud-name=YOUR_CLOUDINARY_CLOUD_NAME
+cloudinary.api-key=YOUR_CLOUDINARY_API_KEY
+cloudinary.api-secret=YOUR_CLOUDINARY_API_SECRET
+
+# Multipart / File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Ejecutar automáticamente schema.sql al iniciar la aplicación
+spring.sql.init.mode=never
+
+# JPA
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Server
+server.port=8080
+
+# Jackson Naming Strategy
+spring.jackson.property-naming-strategy=SNAKE_CASE

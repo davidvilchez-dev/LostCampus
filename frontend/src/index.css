@@ -1,111 +1,283 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* CONFIGURACIÓN DEL TEMA DE TAILWIND CSS V4 */
+@theme {
+  --color-brand-bg: #0b1326;
+  --color-brand-card: #111827;
+  --color-brand-card-hover: #1f2937;
+  --color-brand-accent: #3b82f6;
+  --color-brand-text: #ffffff;
+  --color-brand-muted: #9ca3af;
+  --color-brand-border-dark: #1f2937;
+  --color-brand-border-light: #374151;
+}
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+/* Remover restricciones de ancho por defecto */
+#root {
+  width: 100%;
+  max-width: 100%;
   margin: 0;
+  padding: 0;
+  border: none;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
+/* --- CLASES CSS PERSONALIZADAS PREMIUM (BASADAS EN VARIABLES GLOBALES) --- */
+
+/* Panel con efecto Glassmorphism (Cristal Templado) */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.5); /* Usa color-brand-card traslúcido */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Panel con Glassmorphism destacado y resplandor al pasar el cursor */
+.glass-card-interactive {
+  background: rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-brand-border-dark);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-interactive:hover {
+  background: var(--color-brand-card-hover);
+  border-color: var(--color-brand-accent);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px -10px rgba(59, 130, 246, 0.25);
+}
+
+/* Botón con Resplandor (Glow) */
+.glow-btn-primary {
+  background: var(--color-brand-accent);
+  box-shadow: 0 4px 20px -2px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-btn-primary:hover {
+  box-shadow: 0 0 25px 4px rgba(59, 130, 246, 0.65);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* Botón Secundario con borde brillante */
+.glow-btn-secondary {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-btn-secondary:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--color-brand-accent);
+  box-shadow: 0 0 15px 1px rgba(59, 130, 246, 0.35);
+}
+
+/* Resplandor azul decorativo de fondo */
+.bg-glow-radial {
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, rgba(11, 19, 38, 0) 70%);
+}
+
+/* Animación de flotación suave para la ilustración del Hero */
+.float-anim {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Barra de desplazamiento (Scrollbar) personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-brand-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-border-dark);
   border-radius: 4px;
-  color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-accent);
 }
+
+/* --- FORMULARIOS DE AUTENTICACIÓN --- */
+
+/* Card central del formulario de autenticación */
+.auth-card {
+  background: #131c31;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Input base de autenticación */
+.auth-input {
+  background: #1a2642;
+  border: 1.5px solid #24355a;
+  border-radius: 0.625rem;
+  padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+  color: var(--color-brand-text);
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.auth-input::placeholder {
+  color: rgba(156, 163, 175, 0.5);
+}
+
+.auth-input:focus {
+  border-color: var(--color-brand-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Estado de error del input */
+.auth-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.12);
+}
+
+.auth-input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.auth-input-with-action {
+  padding-right: 2.75rem;
+}
+
+/* Connectly Error Animations & Classes */
+.auth-field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0 0;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #f87171;
+  animation: slideInError 0.25s ease;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Animación de deslizamiento lateral para sidebar móvil */
+.animate-slide-in-left {
+  animation: slideInLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+
+/* Botón de submit de autenticación */
+.auth-btn-submit {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  font-weight: 600;
+  padding: 0.8rem;
+  border-radius: 0.625rem;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+}
+
+.auth-btn-submit:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.auth-btn-submit:active {
+  transform: translateY(0);
+}
+
+.auth-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- ESTILOS DE LEAFLET EN MODO OSCURO --- */
+.leaflet-dark-mode .leaflet-tile-container {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%);
+}
+
+.leaflet-dark-mode .leaflet-container {
+  background-color: var(--color-brand-bg) !important;
+  color: var(--color-brand-text) !important;
+  font-family: inherit;
+}
+
+.leaflet-dark-mode .leaflet-bar {
+  border-color: var(--color-brand-border-dark) !important;
+}
+
+.leaflet-dark-mode .leaflet-bar a {
+  background-color: var(--color-brand-card) !important;
+  color: var(--color-brand-muted) !important;
+  border-bottom: 1px solid var(--color-brand-border-dark) !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-dark-mode .leaflet-bar a:hover {
+  background-color: var(--color-brand-card-hover) !important;
+  color: var(--color-brand-text) !important;
+}
+
+.leaflet-dark-mode .leaflet-bar a.leaflet-disabled {
+  background-color: var(--color-brand-bg) !important;
+  color: var(--color-brand-border-light) !important;
+}
+
+

@@ -1,50 +1,104 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: [INITIAL] → 1.0.0
+- List of modified principles:
+  - Added: I. Decoupled Architecture
+  - Added: II. Service Testing Rigor
+  - Added: III. Quality Gates (95% Coverage)
+  - Added: IV. REST Integration Testing
+  - Added: V. Cloud-Native Storage
+  - Added: VI. Security-First Auth (JWT)
+- Added sections: Development Methodology, Technical Constraints
+- Removed sections: N/A
+- Templates requiring updates:
+  - ✅ updated: .specify/templates/plan-template.md
+  - ✅ updated: .specify/templates/spec-template.md
+  - ✅ updated: .specify/templates/tasks-template.md
+  - ✅ updated: .specify/extensions/agent-context/README.md
+  - ✅ updated: .specify/extensions/agent-context/commands/speckit.agent-context.update.md
+- Follow-up TODOs: N/A
+-->
+
+# LostCampus Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Decoupled Architecture
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+The system MUST follow a client-server architecture with strict separation of concerns.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+- **Backend**: Spring Boot 4 + Java 25.
+- **Frontend**: React 19.
+- **Database**: PostgreSQL 16.
+  Communication between components MUST occur exclusively via RESTful APIs.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Service Testing Rigor
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Every service class MUST have comprehensive unit tests.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+- **Frameworks**: JUnit 5 and Mockito.
+- **Rule**: Tests MUST be written and pass before any service is integrated or considered complete.
+- **Rationale**: Ensure business logic reliability at the atomic level.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Quality Gates (95% Coverage)
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Code quality is non-negotiable and measured by strict coverage metrics.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- **Threshold**: Minimum 95% line coverage for all backend modules.
+- **Tooling**: JaCoCo integrated into the Maven build lifecycle.
+- **Enforcement**: Any build falling below this threshold MUST be rejected.
+
+### IV. REST Integration Testing
+
+All REST endpoints MUST be verified through integration tests.
+
+- **Frameworks**: Spring Boot Test and MockMvc.
+- **Requirement**: Tests must cover success paths, validation errors, and security constraints for every exposed resource.
+
+### V. Cloud-Native Storage
+
+Local server storage is strictly prohibited for user-generated content.
+
+- **Provider**: Cloudinary.
+- **Rule**: All images and media MUST be uploaded directly to Cloudinary.
+- **Rationale**: Ensure statelessness and horizontal scalability of the application server.
+
+### VI. Security-First Auth (JWT)
+
+Authentication and authorization MUST be robust and stateless.
+
+- **Mechanisms**: Spring Security with JSON Web Tokens (JWT).
+- **Hashing**: All passwords MUST be hashed using BCrypt.
+- **Requirement**: Secure token validation on every request to protected resources.
+
+## Development Methodology
+
+### Scrum & SDD Workflow
+
+The project follows an Agile Scrum methodology with exactly 3 sprints of one-week duration each.
+
+- **Framework**: Specification Driven Development (SDD) using the spec-kit framework.
+- **Process**: All features must start with a specification, followed by a plan and task breakdown before implementation.
+
+## Technical Constraints
+
+### Environment & Tools
+
+- **Runtime**: Java 25 / Node.js (current LTS for React).
+- **Build**: Maven (Backend), Vite/pnpm (Frontend).
+- **Infrastructure**: PostgreSQL 16, Cloudinary.
+- **Communication**: REST / JSON.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution serves as the supreme guidance for the LostCampus project.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+### Amendment Procedure
+
+Changes to these principles require consensus from the development team and a corresponding version bump in this document.
+
+### Compliance
+
+All Pull Requests and automated build pipelines MUST verify adherence to these principles. Non-compliant code will not be merged.
+
+**Version**: 1.0.0 | **Ratified**: 2026-06-24 | **Last Amended**: 2026-06-24
