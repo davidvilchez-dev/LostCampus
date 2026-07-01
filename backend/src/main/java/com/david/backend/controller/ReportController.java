@@ -75,6 +75,19 @@ public class ReportController {
     }
 
     /**
+     * HU-13: PUT /api/reports/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ReportResponse> updateReport(
+            @AuthenticationPrincipal Usuario usuario,
+            @PathVariable Long id,
+            @Valid @RequestBody CreateReportRequest request) {
+        ReportResponse response = reportService.updateReport(usuario, id, request);
+        return ResponseEntity.ok(response);
+    }
+
+
+    /**
      * GET /api/reports/mine
      */
     @GetMapping("/mine")

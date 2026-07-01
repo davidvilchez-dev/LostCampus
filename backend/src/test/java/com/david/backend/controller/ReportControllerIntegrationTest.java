@@ -202,4 +202,102 @@ public class ReportControllerIntegrationTest {
         mockMvc.perform(get("/api/reports/999999"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void updateReport_Success() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora original")
+                .descripcion("Casio original")
+                .lugar("Pabellón A")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        String json = "{"
+                + "\"categoria_id\":" + testCategory.getId() + ","
+                + "\"tipo\":\"ENCONTRADO\","
+                + "\"nombre_objeto\":\"Calculadora modificada\","
+                + "\"descripcion\":\"Casio fx-991 actualizada\","
+                + "\"lugar\":\"Pabellón B\","
+                + "\"fecha_incidente\":\"" + LocalDate.now() + "\""
+                + "}";
+
+        mockMvc.perform(put("/api/reports/" + report.getId())
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre_objeto").value("Calculadora modificada"))
+                .andExpect(jsonPath("$.tipo").value("ENCONTRADO"))
+                .andExpect(jsonPath("$.descripcion").value("Casio fx-991 actualizada"))
+                .andExpect(jsonPath("$.lugar").value("Pabellón B"));
+    }
+
+    @Test
+    void updateReport_Forbidden() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora original")
+                .descripcion("Casio original")
+                .lugar("Pabellón A")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        Usuario otherUser = Usuario.builder()
+                .nombreCompleto("Otro Usuario")
+                .correo("otro@unsch.edu.pe")
+                .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                .build();
+        usuarioRepository.save(otherUser);
+        String otherToken = jwtTokenProvider.generateToken(otherUser.getCorreo());
+
+        String json = "{"
+                + "\"categoria_id\":" + testCategory.getId() + ","
+                + "\"tipo\":\"ENCONTRADO\","
+                + "\"nombre_objeto\":\"Calculadora modificada\","
+                + "\"descripcion\":\"Casio fx-991 actualizada\","
+                + "\"lugar\":\"Pabellón B\","
+                + "\"fecha_incidente\":\"" + LocalDate.now() + "\""
+                + "}";
+
+        mockMvc.perform(put("/api/reports/" + report.getId())
+                        .header("Authorization", "Bearer " + otherToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("No tienes permiso para modificar este reporte."));
+    }
+
+    @Test
+    void deleteReport_Forbidden() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora original")
+                .descripcion("Casio original")
+                .lugar("Pabellón A")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        Usuario otherUser = Usuario.builder()
+                .nombreCompleto("Otro Usuario")
+                .correo("otro@unsch.edu.pe")
+                .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                .build();
+        usuarioRepository.save(otherUser);
+        String otherToken = jwtTokenProvider.generateToken(otherUser.getCorreo());
+
+        mockMvc.perform(delete("/api/reports/" + report.getId())
+                        .header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("No tienes permiso para eliminar este reporte."));
+    }
 }

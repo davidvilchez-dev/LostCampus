@@ -172,6 +172,41 @@ public class ReportService {
     }
 
     /**
+     * HU-13: Editar reporte propio
+     */
+    public ReportResponse updateReport(Usuario usuario, Long id, CreateReportRequest request) {
+        Reporte reporte = reporteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado."));
+
+        if (!reporte.getUsuario().getId().equals(usuario.getId())) {
+            throw new RuntimeException("No tienes permiso para modificar este reporte.");
+        }
+
+        if ("CERRADO".equalsIgnoreCase(reporte.getEstado())) {
+            throw new RuntimeException("No se puede editar un reporte cerrado.");
+        }
+
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada."));
+
+        String tipo = request.getTipo().toUpperCase();
+        if (!tipo.equals("PERDIDO") && !tipo.equals("ENCONTRADO")) {
+            throw new RuntimeException("El tipo debe ser PERDIDO o ENCONTRADO.");
+        }
+
+        reporte.setCategoria(categoria);
+        reporte.setTipo(tipo);
+        reporte.setNombreObjeto(request.getNombreObjeto());
+        reporte.setDescripcion(request.getDescripcion());
+        reporte.setLugar(request.getLugar());
+        reporte.setFechaIncidente(request.getFechaIncidente());
+
+        reporteRepository.save(reporte);
+        return ReportResponse.fromEntity(reporte);
+    }
+
+
+    /**
      * Listar reportes del usuario autenticado
      */
     public List<ReportResponse> getMyReports(Usuario usuario) {

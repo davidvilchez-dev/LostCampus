@@ -45,8 +45,8 @@ Este es el tablero central de control para el desarrollo ágil de la plataforma 
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **HU-11** | Filtrar reportes por categoría, tipo y fecha | Gestión de Reportes | Alta | 3 | `specs/007-search-filters/` | 🟢 Completado |
 | **HU-12** | Ver detalle completo de un reporte | Gestión de Reportes | Alta | 2 | `specs/008-report-detail/` | 🟢 Completado |
-| **HU-13** | Editar reportes activos | Gestión de Reportes | Media | 3 | `specs/009-edit-reports/` | 🔴 Pendiente |
-| **HU-14** | Eliminar reportes propios | Gestión de Reportes | Media | 2 | `specs/010-delete-reports/` | 🔴 Pendiente |
+| **HU-13** | Editar reportes activos | Gestión de Reportes | Media | 3 | `specs/009-edit-delete-reports/` | 🟢 Completado |
+| **HU-14** | Eliminar reportes propios | Gestión de Reportes | Media | 2 | `specs/009-edit-delete-reports/` | 🟢 Completado |
 | **HU-15** | Listado de mis reportes | Gestión de Reportes | Media | 2 | `specs/011-my-reports-list/` | 🔴 Pendiente |
 | **HU-16** | Marcar reporte como recuperado | Gestión de Reportes | Media | 2 | `specs/012-mark-recovered/` | 🔴 Pendiente |
 | **HU-17** | Detección automática de coincidencias | Coincidencias | Alta | 13 | `specs/013-matching-detection/`| 🔴 Pendiente |

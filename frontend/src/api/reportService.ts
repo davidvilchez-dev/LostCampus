@@ -148,3 +148,13 @@ export async function deleteReport(id: number): Promise<{ mensaje: string }> {
   const response = await axiosClient.delete<{ mensaje: string }>(`reports/${id}`);
   return response.data;
 }
+
+/**
+ * HU-13: Actualiza un reporte del usuario.
+ * PUT /api/reports/{id}
+ */
+export async function updateReport(id: number, data: CreateReportRequest): Promise<Reporte> {
+  const response = await axiosClient.put<Reporte>(`reports/${id}`, data);
+  return response.data;
+}
+

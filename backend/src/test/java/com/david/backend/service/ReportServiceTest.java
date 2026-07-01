@@ -241,4 +241,55 @@ public class ReportServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> reportService.getReportById(999L));
     }
+
+    @Test
+    void updateReport_Success() {
+        CreateReportRequest request = new CreateReportRequest();
+        request.setCategoriaId(1L);
+        request.setTipo("ENCONTRADO");
+        request.setNombreObjeto("iPhone 13 Pro");
+        request.setDescripcion("Actualizado: Color azul");
+        request.setLugar("Biblioteca");
+        request.setFechaIncidente(LocalDate.now());
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(categoriaRepository.findById(1L)).thenReturn(Optional.of(testCategory));
+        when(reporteRepository.save(any(Reporte.class))).thenReturn(testReport);
+
+        ReportResponse response = reportService.updateReport(testUser, 10L, request);
+
+        assertNotNull(response);
+        assertEquals("iPhone 13 Pro", testReport.getNombreObjeto());
+        assertEquals("ENCONTRADO", testReport.getTipo());
+        verify(reporteRepository).save(testReport);
+    }
+
+    @Test
+    void updateReport_NotFound_ThrowsException() {
+        CreateReportRequest request = new CreateReportRequest();
+        when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> reportService.updateReport(testUser, 999L, request));
+    }
+
+    @Test
+    void updateReport_Forbidden_ThrowsException() {
+        CreateReportRequest request = new CreateReportRequest();
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.updateReport(otherUser, 10L, request));
+    }
+
+    @Test
+    void updateReport_ClosedReport_ThrowsException() {
+        CreateReportRequest request = new CreateReportRequest();
+        testReport.setEstado("CERRADO");
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.updateReport(testUser, 10L, request));
+    }
+
 }

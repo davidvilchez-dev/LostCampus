@@ -26,10 +26,7 @@ export default function MyReportsPage() {
   }, []);
 
   const handleEdit = (id: number) => {
-    const report = reports.find((r) => r.id === id);
-    if (report) {
-      toast.info(`Editar reporte: "${report.nombre_objeto}" (Función disponible en el feed)`);
-    }
+    navigate(`/reporte/${id}/editar`);
   };
 
   const handleResolve = (id: number) => {

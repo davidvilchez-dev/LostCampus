@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User } from 'lucide-react';
-import { getReportById, type Reporte } from '../api/reportService';
+import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { getReportById, deleteReport, type Reporte } from '../api/reportService';
 import { toast } from 'react-toastify';
+import useAuthStore from '../store/authStore';
 
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   
   const [report, setReport] = useState<Reporte | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -54,6 +57,28 @@ export default function ReportDetailPage() {
   const prevSlide = () => {
     if (!hasImages) return;
     setActiveSlide((prev) => (prev - 1 + report.imagenes_urls.length) % report.imagenes_urls.length);
+  };
+
+  const isOwner = user && report && user.id === report.autor_id;
+
+  const handleEdit = () => {
+    navigate(`/reporte/${id}/editar`);
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar el reporte "${report.nombre_objeto}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await deleteReport(report.id);
+      toast.success('Reporte eliminado con éxito.');
+      navigate('/mis-reportes');
+    } catch (err: any) {
+      toast.error('No se pudo eliminar el reporte.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -146,24 +171,47 @@ export default function ReportDetailPage() {
           {/* Bloque Superior: Categoría y Estados */}
           <div className="space-y-4">
             
-            <div className="flex flex-wrap items-center gap-2.5">
-              {/* Tipo de Reporte */}
-              <span
-                className={`px-3.5 py-1 text-xs font-bold rounded-full border tracking-wide uppercase ${
-                  isPerdido
-                    ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                    : 'bg-green-500/10 text-green-400 border-green-500/20'
-                }`}
-              >
-                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 ${isPerdido ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`}></span>
-                {isPerdido ? 'Objeto Perdido' : 'Objeto Encontrado'}
-              </span>
-
-              {/* Estado de Recuperado */}
-              {isRecuperado && (
-                <span className="px-3.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 tracking-wide uppercase animate-pulse">
-                  Recuperado
+            <div className="flex justify-between items-start gap-4 w-full">
+              <div className="flex flex-wrap items-center gap-2.5">
+                {/* Tipo de Reporte */}
+                <span
+                  className={`px-3.5 py-1 text-xs font-bold rounded-full border tracking-wide uppercase ${
+                    isPerdido
+                      ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                      : 'bg-green-500/10 text-green-400 border-green-500/20'
+                  }`}
+                >
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 ${isPerdido ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`}></span>
+                  {isPerdido ? 'Objeto Perdido' : 'Objeto Encontrado'}
                 </span>
+
+                {/* Estado de Recuperado */}
+                {isRecuperado && (
+                  <span className="px-3.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 tracking-wide uppercase animate-pulse">
+                    Recuperado
+                  </span>
+                )}
+              </div>
+
+              {/* Acciones de Propietario */}
+              {isOwner && !isRecuperado && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={handleEdit}
+                    title="Editar reporte"
+                    className="p-2 bg-brand-border-dark/50 hover:bg-brand-border-light text-brand-muted hover:text-brand-text rounded-xl border border-brand-border-dark/60 transition-all cursor-pointer shadow-md hover:scale-105"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    title="Eliminar reporte"
+                    disabled={isDeleting}
+                    className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl border border-red-500/20 hover:border-red-500/30 transition-all cursor-pointer shadow-md hover:scale-105 disabled:opacity-50"
+                  >
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
+                </div>
               )}
             </div>
 
