@@ -24,7 +24,6 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long>, org.spr
     @Query("SELECT r FROM Reporte r WHERE r.categoria.id = :categoriaId " +
            "AND r.tipo = :tipo " +
            "AND r.id <> :reportId " +
-           "AND r.usuario.id <> :usuarioId " +
            "AND r.estado = 'ACTIVO'")
     List<Reporte> findCandidatesForMatching(
             @Param("categoriaId") Long categoriaId,
