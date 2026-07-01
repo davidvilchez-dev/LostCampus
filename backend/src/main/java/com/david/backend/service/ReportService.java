@@ -285,29 +285,65 @@ public class ReportService {
         );
 
         List<MatchResponse> matches = new ArrayList<>();
-        String textRef = (reporteRef.getNombreObjeto() + " " + reporteRef.getDescripcion()).toLowerCase();
 
         for (Reporte candidate : candidates) {
-            // 1. Similitud Temporal (15%): Máxima diferencia de 30 días, linealizado a 1.0 - 0.0
+            // 1. Similitud Temporal (15%): Máxima diferencia de 30 días
             long daysBetween = Math.abs(ChronoUnit.DAYS.between(reporteRef.getFechaIncidente(), candidate.getFechaIncidente()));
             if (daysBetween > 30) {
-                continue; // Supera la ventana temporal dura de 30 días
+                continue; // Supera la ventana temporal de 30 días
             }
             double timeScore = 1.0 - ((double) daysBetween / 30.0);
 
-            // 2. Similitud Textual (60%): Coeficiente Jaccard sobre nombre y descripción
-            String textCand = (candidate.getNombreObjeto() + " " + candidate.getDescripcion()).toLowerCase();
-            double textScore = SimilarityUtils.calculateJaccardSimilarity(textRef, textCand);
+            // 2. Similitud Textual (60%)
+            // Similitud de nombre por separado
+            double nameScore = SimilarityUtils.calculateJaccardSimilarity(
+                    reporteRef.getNombreObjeto().toLowerCase(),
+                    candidate.getNombreObjeto().toLowerCase()
+            );
+            // Si el nombre es idéntico o muy similar, boost a 1.0
+            if (nameScore >= 0.8) {
+                nameScore = 1.0;
+            }
 
-            // 3. Similitud de Ubicación (25%): Jaccard sobre el campo lugar
-            double placeScore = SimilarityUtils.calculateJaccardSimilarity(reporteRef.getLugar(), candidate.getLugar());
+            // Similitud de descripción por separado
+            double descScore = 1.0;
+            String descRef = reporteRef.getDescripcion() != null ? reporteRef.getDescripcion().trim().toLowerCase() : "";
+            String descCand = candidate.getDescripcion() != null ? candidate.getDescripcion().trim().toLowerCase() : "";
+            if (!descRef.isEmpty() && !descCand.isEmpty()) {
+                descScore = SimilarityUtils.calculateJaccardSimilarity(descRef, descCand);
+            } else if (!descRef.isEmpty() || !descCand.isEmpty()) {
+                descScore = 0.5; // Una tiene descripción y la otra no
+            }
+
+            double textScore = (nameScore * 0.70) + (descScore * 0.30);
+
+            // 3. Similitud de Ubicación (25%)
+            double placeScore = SimilarityUtils.calculateJaccardSimilarity(
+                    reporteRef.getLugar().toLowerCase(),
+                    candidate.getLugar().toLowerCase()
+            );
+            // Si ambas contienen "Universidad" o "UNSCH", dar un baseline de 0.85
+            boolean isSameCampus = (reporteRef.getLugar().toLowerCase().contains("universidad") || reporteRef.getLugar().toLowerCase().contains("unsch"))
+                    && (candidate.getLugar().toLowerCase().contains("universidad") || candidate.getLugar().toLowerCase().contains("unsch"));
+            if (isSameCampus) {
+                placeScore = Math.max(placeScore, 0.85);
+            }
 
             // Puntuación combinada
             double totalScore = (textScore * 0.60) + (placeScore * 0.25) + (timeScore * 0.15);
 
+            // Boost adicional si es la misma categoría y nombre exacto
+            if (nameScore == 1.0 && reporteRef.getCategoria().getId().equals(candidate.getCategoria().getId())) {
+                totalScore = totalScore * 1.15;
+            }
+
+            // Limitar a máximo 100% (1.0)
+            if (totalScore > 1.0) {
+                totalScore = 1.0;
+            }
+
             // Filtrar bajo el umbral del 25%
             if (totalScore >= 0.25) {
-                // Redondear porcentaje
                 double roundedPercentage = Math.round(totalScore * 1000.0) / 10.0;
                 ReportResponse reportResponse = ReportResponse.fromEntity(candidate);
                 matches.add(new MatchResponse(reportResponse, roundedPercentage));
