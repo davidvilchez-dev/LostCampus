@@ -90,7 +90,7 @@ export default function ImageUploadDropzone({ images, onChange }: ImageUploadDro
         onDragLeave={handleDrag}
         onDrop={handleDrop}
         onClick={onButtonClick}
-        className={`w-full aspect-auto min-h-[300px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
+        className={`w-full aspect-auto min-h-[140px] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-all duration-300 ${
           isDragActive
             ? 'border-brand-accent bg-brand-accent/5 shadow-[0_0_20px_rgba(59,130,246,0.15)] scale-[0.99]'
             : 'border-brand-border-light bg-[#131c31]/30 hover:border-brand-accent/60 hover:bg-[#1a2642]/20'
@@ -105,7 +105,7 @@ export default function ImageUploadDropzone({ images, onChange }: ImageUploadDro
           onChange={handleChange}
         />
 
-        <Upload className={`w-10 h-10 mb-4 transition-colors duration-300 ${isDragActive ? 'text-brand-accent' : 'text-brand-muted/60'}`} />
+        <Upload className={`w-7 h-7 mb-2 transition-colors duration-300 ${isDragActive ? 'text-brand-accent' : 'text-brand-muted/60'}`} />
 
         <p className="text-sm font-semibold text-brand-text mb-1">
           Arrastra tus fotos aquí o <span className="text-brand-accent hover:underline">explorar archivos</span>

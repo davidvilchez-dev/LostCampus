@@ -50,13 +50,13 @@ export default function ReportCard({ report }: ReportCardProps) {
         
         {/* Etiqueta flotante */}
         <span
-          className={`absolute top-4 left-4 z-10 px-3 py-1 text-xs font-semibold rounded-full border tracking-wide uppercase ${
+          className={`absolute top-4 left-4 z-10 px-3 py-1 text-xs font-bold rounded-full border tracking-wide uppercase shadow-md ${
             isPerdido
-              ? 'bg-red-500/10 text-red-400 border-red-500/20'
-              : 'bg-green-500/10 text-green-400 border-green-500/20'
+              ? 'bg-red-500 text-white border-red-600/20'
+              : 'bg-emerald-600 text-white border-emerald-700/20'
           }`}
         >
-          <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${isPerdido ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`}></span>
+          <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${isPerdido ? 'bg-white animate-pulse' : 'bg-white'}`}></span>
           {isPerdido ? 'Perdido' : 'Encontrado'}
         </span>
 

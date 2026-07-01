@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 import { Plus, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
 import MyReportCard, { type MyReport } from '../components/MyReportCard';
-import { getMyReports, deleteReport } from '../api/reportService';
+import ConfirmModal from '../components/ConfirmModal';
+import { getMyReports, deleteReport, resolveReport } from '../api/reportService';
 
 export default function MyReportsPage() {
   const navigate = useNavigate();
@@ -29,31 +30,91 @@ export default function MyReportsPage() {
     navigate(`/reporte/${id}/editar`);
   };
 
+  // Estados para modal de confirmación
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    cancelText?: string;
+    type: 'info' | 'danger' | 'warning';
+    onConfirm: () => void;
+    isSubmitting: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    type: 'info',
+    onConfirm: () => {},
+    isSubmitting: false,
+  });
+
   const handleResolve = (id: number) => {
-    setReports((prev) =>
-      prev.map((r) => {
-        if (r.id === id) {
-          toast.success(`¡Reporte "${r.nombre_objeto}" marcado como resuelto!`);
-          return {
-            ...r,
-            estado: 'CERRADO',
-            motivo_cierre: 'Marcar como resuelto. Objeto recuperado por el dueño.',
-          };
+    const report = reports.find((r) => r.id === id);
+    if (!report) return;
+
+    setModalConfig({
+      isOpen: true,
+      title: '¿Resolver reporte?',
+      message: '¿Estás seguro de que deseas marcar este reporte como resuelto? Esta acción no se puede deshacer y cerrará la publicación permanentemente.',
+      confirmText: 'Resolver',
+      cancelText: 'Cancelar',
+      type: 'info',
+      isSubmitting: false,
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isSubmitting: true }));
+        try {
+          await resolveReport(id);
+          toast.success(`¡Reporte "${report.nombre_objeto}" marcado como resuelto!`);
+          setReports((prev) =>
+            prev.map((r) =>
+              r.id === id
+                ? {
+                    ...r,
+                    estado: 'CERRADO',
+                    motivo_cierre: 'Marcar como resuelto. Objeto recuperado por el dueño.',
+                  }
+                : r
+            )
+          );
+          setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        } catch (err: any) {
+          const message = err.response?.data?.error || 'No se pudo resolver el reporte.';
+          toast.error(message);
+        } finally {
+          setModalConfig((prev) => ({ ...prev, isSubmitting: false }));
         }
-        return r;
-      })
-    );
+      },
+    });
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (id: number) => {
     const report = reports.find((r) => r.id === id);
-    try {
-      await deleteReport(id);
-      setReports((prev) => prev.filter((r) => r.id !== id));
-      toast.success(`Reporte "${report?.nombre_objeto || ''}" eliminado con éxito.`);
-    } catch (err: any) {
-      toast.error('No se pudo eliminar el reporte.');
-    }
+    if (!report) return;
+
+    setModalConfig({
+      isOpen: true,
+      title: '¿Eliminar reporte?',
+      message: '¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer y borrará permanentemente todo su contenido.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger',
+      isSubmitting: false,
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isSubmitting: true }));
+        try {
+          await deleteReport(id);
+          setReports((prev) => prev.filter((r) => r.id !== id));
+          toast.success(`Reporte "${report.nombre_objeto}" eliminado con éxito.`);
+          setModalConfig((prev) => ({ ...prev, isOpen: false }));
+        } catch (err: any) {
+          toast.error('No se pudo eliminar el reporte.');
+        } finally {
+          setModalConfig((prev) => ({ ...prev, isSubmitting: false }));
+        }
+      },
+    });
   };
 
   return (
@@ -117,6 +178,18 @@ export default function MyReportsPage() {
           </button>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        type={modalConfig.type}
+        isSubmitting={modalConfig.isSubmitting}
+      />
     </div>
   );
 }

@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import com.david.backend.dto.response.MatchResponse;
+import com.david.backend.util.SimilarityUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -207,6 +209,26 @@ public class ReportService {
 
 
     /**
+     * HU-16: Marcar reporte como recuperado (resuelto)
+     */
+    public ReportResponse resolveReport(Usuario usuario, Long id) {
+        Reporte reporte = reporteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado."));
+
+        if (!reporte.getUsuario().getId().equals(usuario.getId())) {
+            throw new RuntimeException("No tienes permiso para modificar este reporte.");
+        }
+
+        if ("CERRADO".equalsIgnoreCase(reporte.getEstado())) {
+            throw new RuntimeException("El reporte ya se encuentra resuelto.");
+        }
+
+        reporte.setEstado("CERRADO");
+        reporteRepository.save(reporte);
+        return ReportResponse.fromEntity(reporte);
+    }
+
+    /**
      * Listar reportes del usuario autenticado
      */
     public List<ReportResponse> getMyReports(Usuario usuario) {
@@ -238,5 +260,63 @@ public class ReportService {
         }
 
         reporteRepository.delete(reporte);
+    }
+
+    /**
+     * HU-17: Obtener coincidencias sugeridas basadas en algoritmo híbrido
+     */
+    public List<MatchResponse> getMatches(Usuario usuario, Long reportId) {
+        Reporte reporteRef = reporteRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado."));
+
+        if (!reporteRef.getUsuario().getId().equals(usuario.getId())) {
+            throw new RuntimeException("No tienes permiso para ver las coincidencias de este reporte.");
+        }
+
+        // Tipo opuesto
+        String oppositeTipo = "PERDIDO".equalsIgnoreCase(reporteRef.getTipo()) ? "ENCONTRADO" : "PERDIDO";
+
+        // Obtener candidatos de la misma categoría, tipo opuesto, activos y excluyendo el propio reporte y autor
+        List<Reporte> candidates = reporteRepository.findCandidatesForMatching(
+                reporteRef.getCategoria().getId(),
+                oppositeTipo,
+                reporteRef.getId(),
+                usuario.getId()
+        );
+
+        List<MatchResponse> matches = new ArrayList<>();
+        String textRef = (reporteRef.getNombreObjeto() + " " + reporteRef.getDescripcion()).toLowerCase();
+
+        for (Reporte candidate : candidates) {
+            // 1. Similitud Temporal (15%): Máxima diferencia de 30 días, linealizado a 1.0 - 0.0
+            long daysBetween = Math.abs(ChronoUnit.DAYS.between(reporteRef.getFechaIncidente(), candidate.getFechaIncidente()));
+            if (daysBetween > 30) {
+                continue; // Supera la ventana temporal dura de 30 días
+            }
+            double timeScore = 1.0 - ((double) daysBetween / 30.0);
+
+            // 2. Similitud Textual (60%): Coeficiente Jaccard sobre nombre y descripción
+            String textCand = (candidate.getNombreObjeto() + " " + candidate.getDescripcion()).toLowerCase();
+            double textScore = SimilarityUtils.calculateJaccardSimilarity(textRef, textCand);
+
+            // 3. Similitud de Ubicación (25%): Jaccard sobre el campo lugar
+            double placeScore = SimilarityUtils.calculateJaccardSimilarity(reporteRef.getLugar(), candidate.getLugar());
+
+            // Puntuación combinada
+            double totalScore = (textScore * 0.60) + (placeScore * 0.25) + (timeScore * 0.15);
+
+            // Filtrar bajo el umbral del 30%
+            if (totalScore >= 0.30) {
+                // Redondear porcentaje
+                double roundedPercentage = Math.round(totalScore * 1000.0) / 10.0;
+                ReportResponse reportResponse = ReportResponse.fromEntity(candidate);
+                matches.add(new MatchResponse(reportResponse, roundedPercentage));
+            }
+        }
+
+        // Ordenar descendente por similitud (score)
+        matches.sort((m1, m2) -> Double.compare(m2.getScore(), m1.getScore()));
+
+        return matches;
     }
 }

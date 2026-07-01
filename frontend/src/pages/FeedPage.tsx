@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Search, Plus, Filter, ChevronDown, Calendar, MapPin, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { Search, Plus, Filter, ChevronDown, Calendar, MapPin, RotateCcw, SlidersHorizontal, X } from 'lucide-react';
 import ReportCard, { type Report } from '../components/ReportCard';
 import { getReports, getCategorias, type Categoria } from '../api/reportService';
 import { toast } from 'react-toastify';
@@ -163,22 +163,6 @@ export default function FeedPage() {
           {/* Botones de acción de Filtros / Ordenamiento */}
           <div className="flex flex-wrap items-center gap-3">
             
-            {/* Botón Filtros Avanzados */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                showFilters || hasActiveFilters
-                  ? 'bg-brand-accent/15 border-brand-accent text-brand-accent shadow-[0_0_10px_rgba(59,130,246,0.15)]'
-                  : 'bg-[#131c31] border-brand-border-dark hover:border-[#24355a] text-brand-text'
-              }`}
-            >
-              <SlidersHorizontal className="w-4 h-4 shrink-0" />
-              <span>Filtros</span>
-              {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-brand-accent" />
-              )}
-            </button>
-
             {/* Quick Filter: Tipo */}
             <div className="flex bg-[#131c31] border border-brand-border-dark rounded-xl p-1">
               <button
@@ -220,31 +204,77 @@ export default function FeedPage() {
               <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted/60 pointer-events-none" />
             </div>
 
+            {/* Botón Filtros Avanzados (Far Right) */}
+            <button
+              onClick={() => setShowFilters(true)}
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                hasActiveFilters
+                  ? 'bg-brand-accent/15 border-brand-accent text-brand-accent shadow-[0_0_10px_rgba(59,130,246,0.15)]'
+                  : 'bg-[#131c31] border-brand-border-dark hover:border-[#24355a] text-brand-text'
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4 shrink-0" />
+              <span>Filtros</span>
+              {hasActiveFilters && (
+                <span className="w-2 h-2 rounded-full bg-brand-accent" />
+              )}
+            </button>
+
           </div>
 
         </div>
 
-        {/* Panel de Filtros Avanzados (Colapsable) */}
-        {showFilters && (
-          <div className="bg-brand-card/90 border border-brand-border-dark/85 rounded-2xl p-5 space-y-5 animate-slideDown shadow-xl backdrop-blur-md">
+      </div>
+
+      {/* Drawer de Filtros (Desplazamiento desde la derecha) */}
+      <div 
+        className={`fixed inset-0 z-50 overflow-hidden transition-all duration-300 ${
+          showFilters ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Backdrop con desenfoque suave */}
+        <div 
+          className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
+          onClick={() => setShowFilters(false)}
+        ></div>
+
+        {/* Panel Desplazable (Drawer) */}
+        <div 
+          className={`absolute top-0 right-0 h-full w-full max-w-sm bg-[#0b0f19] border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 transform ${
+            showFilters ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <SlidersHorizontal className="w-4.5 h-4.5 text-brand-accent" />
+              <h3 className="text-base font-bold text-slate-100">Filtros avanzados</h3>
+            </div>
+            <button 
+              onClick={() => setShowFilters(false)}
+              className="text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Body (Campos del Filtro) */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             
-            {/* Header del Panel */}
-            <div className="flex items-center justify-between border-b border-brand-border-dark/65 pb-3">
-              <h3 className="text-sm font-bold text-brand-text uppercase tracking-wider flex items-center space-x-2">
-                <span>Filtros avanzados</span>
-              </h3>
+            {/* Resetear Filtros */}
+            {hasActiveFilters && (
               <button
                 onClick={handleResetFilters}
-                className="flex items-center space-x-1.5 text-xs text-brand-accent hover:underline font-semibold cursor-pointer"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl border border-brand-accent/30 bg-brand-accent/5 hover:bg-brand-accent/10 text-xs text-brand-accent font-semibold transition-all cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restablecer todo</span>
+                <span>Restablecer todos los filtros</span>
               </button>
-            </div>
+            )}
 
-            {/* Fila 1: Selección de Categorías (Múltiples) */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider">
+            {/* Categorías */}
+            <div className="space-y-2.5">
+              <label className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider block">
                 Categorías (Permite múltiples)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -267,12 +297,15 @@ export default function FeedPage() {
               </div>
             </div>
 
-            {/* Fila 2: Rango de Fechas & Ubicación */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
+            {/* Rango de Fechas */}
+            <div className="space-y-4">
+              <span className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider block border-b border-slate-800 pb-1">
+                Rango de Fechas
+              </span>
+
               {/* Fecha Inicio */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider flex items-center space-x-1.5">
+                <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
                   <Calendar className="w-3.5 h-3.5 text-brand-muted" />
                   <span>Desde</span>
                 </label>
@@ -286,7 +319,7 @@ export default function FeedPage() {
 
               {/* Fecha Fin */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider flex items-center space-x-1.5">
+                <label className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
                   <Calendar className="w-3.5 h-3.5 text-brand-muted" />
                   <span>Hasta</span>
                 </label>
@@ -298,41 +331,48 @@ export default function FeedPage() {
                 />
               </div>
 
-              {/* Ubicación / Campus Zone */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider flex items-center space-x-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-brand-muted" />
-                  <span>Zona del Campus</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedLugar}
-                    onChange={(e) => setSelectedLugar(e.target.value)}
-                    className="appearance-none w-full bg-[#101726]/40 border border-brand-border-dark/60 rounded-xl py-2 pl-3 pr-8 text-xs text-brand-text outline-none focus:border-brand-accent cursor-pointer transition-all"
-                  >
-                    <option value="">Todas las zonas</option>
-                    {campusZones.map((zone) => (
-                      <option key={zone} value={zone}>
-                        {zone}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted/60 pointer-events-none" />
-                </div>
-              </div>
-
+              {dateError && (
+                <p className="text-xs font-semibold text-red-400">
+                  {dateError}
+                </p>
+              )}
             </div>
 
-            {/* Error de Rango de Fechas */}
-            {dateError && (
-              <p className="text-xs font-semibold text-brand-danger">
-                {dateError}
-              </p>
-            )}
+            {/* Ubicación / Campus Zone */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-brand-muted/80 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-800 pb-1">
+                <MapPin className="w-3.5 h-3.5 text-brand-muted" />
+                <span>Zona del Campus</span>
+              </label>
+              <div className="relative mt-2">
+                <select
+                  value={selectedLugar}
+                  onChange={(e) => setSelectedLugar(e.target.value)}
+                  className="appearance-none w-full bg-[#101726]/40 border border-brand-border-dark/60 rounded-xl py-2.5 pl-3 pr-8 text-xs text-brand-text outline-none focus:border-brand-accent cursor-pointer transition-all"
+                >
+                  <option value="">Todas las zonas</option>
+                  {campusZones.map((zone) => (
+                    <option key={zone} value={zone}>
+                      {zone}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-muted/60 pointer-events-none" />
+              </div>
+            </div>
 
           </div>
-        )}
 
+          {/* Footer del Drawer */}
+          <div className="px-6 py-4 border-t border-slate-800 bg-[#080c14] flex gap-3">
+            <button
+              onClick={() => setShowFilters(false)}
+              className="flex-1 py-2.5 text-xs font-bold text-brand-text bg-brand-accent hover:brightness-110 rounded-xl transition-all shadow-[0_4px_12px_rgba(59,130,246,0.3)] cursor-pointer text-center"
+            >
+              Aplicar filtros
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Grid de Reportes */}

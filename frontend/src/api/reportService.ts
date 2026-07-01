@@ -158,3 +158,27 @@ export async function updateReport(id: number, data: CreateReportRequest): Promi
   return response.data;
 }
 
+/**
+ * HU-16: Marca un reporte como recuperado (resuelto).
+ * PATCH /api/reports/{id}/resolve
+ */
+export async function resolveReport(id: number): Promise<Reporte> {
+  const response = await axiosClient.patch<Reporte>(`reports/${id}/resolve`);
+  return response.data;
+}
+
+export interface MatchResponse extends Reporte {
+  score: number;
+}
+
+/**
+ * HU-18: Obtener coincidencias sugeridas.
+ * GET /api/reports/{id}/matches
+ */
+export async function getSuggestedMatches(id: number): Promise<MatchResponse[]> {
+  const response = await axiosClient.get<MatchResponse[]>(`reports/${id}/matches`);
+  return response.data;
+}
+
+
+

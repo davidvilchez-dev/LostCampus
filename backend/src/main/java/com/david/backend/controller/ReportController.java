@@ -3,6 +3,7 @@ package com.david.backend.controller;
 import com.david.backend.dto.request.CreateReportRequest;
 import com.david.backend.dto.response.MessageResponse;
 import com.david.backend.dto.response.ReportResponse;
+import com.david.backend.dto.response.MatchResponse;
 import com.david.backend.model.Usuario;
 import com.david.backend.service.ReportService;
 import jakarta.validation.Valid;
@@ -86,6 +87,27 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
+
+    /**
+     * HU-16: PATCH /api/reports/{id}/resolve
+     */
+    @PatchMapping("/{id}/resolve")
+    public ResponseEntity<ReportResponse> resolveReport(
+            @AuthenticationPrincipal Usuario usuario,
+            @PathVariable Long id) {
+        ReportResponse response = reportService.resolveReport(usuario, id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * HU-18: GET /api/reports/{id}/matches
+     */
+    @GetMapping("/{id}/matches")
+    public ResponseEntity<List<MatchResponse>> getMatches(
+            @AuthenticationPrincipal Usuario usuario,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(reportService.getMatches(usuario, id));
+    }
 
     /**
      * GET /api/reports/mine

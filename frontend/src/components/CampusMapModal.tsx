@@ -147,7 +147,7 @@ export default function CampusMapModal({ isOpen, onClose, onSelectLocation, curr
         </div>
 
         {/* Map Container con filtro de Modo Oscuro */}
-        <div className="relative w-full aspect-auto min-h-[300px] bg-brand-bg-dark leaflet-dark-mode">
+        <div className="relative w-full h-[350px] bg-brand-bg-dark leaflet-dark-mode">
           <div ref={mapContainerRef} className="w-full h-full z-0"></div>
         </div>
 

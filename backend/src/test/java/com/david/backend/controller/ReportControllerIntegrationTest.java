@@ -300,4 +300,117 @@ public class ReportControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("No tienes permiso para eliminar este reporte."));
     }
+
+    @Test
+    void resolveReport_Success() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora original")
+                .descripcion("Casio original")
+                .lugar("Pabellón A")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        mockMvc.perform(patch("/api/reports/" + report.getId() + "/resolve")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("CERRADO"));
+    }
+
+    @Test
+    void resolveReport_Forbidden() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora original")
+                .descripcion("Casio original")
+                .lugar("Pabellón A")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        Usuario otherUser = Usuario.builder()
+                .nombreCompleto("Otro Usuario")
+                .correo("otro@unsch.edu.pe")
+                .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                .build();
+        usuarioRepository.save(otherUser);
+        String otherToken = jwtTokenProvider.generateToken(otherUser.getCorreo());
+
+        mockMvc.perform(patch("/api/reports/" + report.getId() + "/resolve")
+                        .header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("No tienes permiso para modificar este reporte."));
+    }
+
+    @Test
+    void getMatches_Success() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora Casio fx-991")
+                .descripcion("Se me perdio una calculadora casio plateada")
+                .lugar("Biblioteca central")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        Usuario otherUser = Usuario.builder()
+                .nombreCompleto("Otro Usuario")
+                .correo("otro@unsch.edu.pe")
+                .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                .build();
+        usuarioRepository.save(otherUser);
+        String otherToken = jwtTokenProvider.generateToken(otherUser.getCorreo());
+
+        Reporte candidate = Reporte.builder()
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("Calculadora Casio")
+                .descripcion("Encontre una calculadora casio fx-991 plateada")
+                .lugar("Biblioteca")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        reporteRepository.save(candidate);
+
+        mockMvc.perform(get("/api/reports/" + report.getId() + "/matches")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].nombre_objeto").value("Calculadora Casio"))
+                .andExpect(jsonPath("$[0].score").exists());
+    }
+
+    @Test
+    void getMatches_Forbidden() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("Calculadora Casio fx-991")
+                .descripcion("Se me perdio una calculadora casio plateada")
+                .lugar("Biblioteca central")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        Usuario otherUser = Usuario.builder()
+                .nombreCompleto("Otro Usuario")
+                .correo("otro@unsch.edu.pe")
+                .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                .build();
+        usuarioRepository.save(otherUser);
+        String otherToken = jwtTokenProvider.generateToken(otherUser.getCorreo());
+
+        mockMvc.perform(get("/api/reports/" + report.getId() + "/matches")
+                        .header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("No tienes permiso para ver las coincidencias de este reporte."));
+    }
 }

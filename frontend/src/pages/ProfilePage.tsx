@@ -190,38 +190,38 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-4">
       {/* Encabezado */}
       <div>
-        <h1 className="text-3xl font-extrabold text-brand-text tracking-tight flex items-center gap-3">
-          <UserCog className="w-8 h-8 text-brand-accent shrink-0" />
+        <h1 className="text-2xl font-extrabold text-brand-text tracking-tight flex items-center gap-2.5">
+          <UserCog className="w-7 h-7 text-brand-accent shrink-0" />
           <span>Perfil de Usuario</span>
         </h1>
-        <p className="text-brand-muted text-sm mt-1.5 font-normal">
+        <p className="text-brand-muted text-xs mt-0.5 font-normal">
           Gestiona tu información personal y la seguridad de tu cuenta.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Columna Izquierda: Datos Personales */}
-        <form onSubmit={handleSaveProfile} className="rounded-2xl border border-brand-border-dark bg-brand-card p-6 space-y-6 shadow-xl flex flex-col justify-between">
-          <div className="space-y-6">
+        <form onSubmit={handleSaveProfile} className="rounded-2xl border border-brand-border-dark bg-brand-card p-4 lg:p-5 space-y-4 shadow-xl flex flex-col justify-between">
+          <div className="space-y-4">
             <div>
               <h2 className="text-base font-bold text-brand-text">Datos Personales</h2>
               <div className="h-px bg-brand-border-dark/50 my-3"></div>
             </div>
 
             {/* Gestión del Avatar */}
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative group">
+            <div className="flex flex-row items-center justify-center gap-6 py-2">
+              <div className="relative group shrink-0">
                 {fotoUrl ? (
                   <img
                     src={fotoUrl}
                     alt={nombreCompleto}
-                    className="w-28 h-28 rounded-full object-cover border-2 border-brand-accent/50 group-hover:brightness-90 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-brand-accent/50 group-hover:brightness-90 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
                   />
                 ) : (
-                  <div className="w-28 h-28 rounded-full bg-brand-accent/15 border-2 border-brand-accent/40 flex items-center justify-center text-brand-accent font-extrabold text-2xl group-hover:bg-brand-accent/20 transition-all duration-300 shadow-lg">
+                  <div className="w-20 h-20 rounded-full bg-brand-accent/15 border-2 border-brand-accent/40 flex items-center justify-center text-brand-accent font-extrabold text-xl group-hover:bg-brand-accent/20 transition-all duration-300 shadow-lg">
                     {getInitials(nombreCompleto)}
                   </div>
                 )}
@@ -230,10 +230,10 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 p-2 bg-brand-accent hover:brightness-110 text-brand-text rounded-full shadow-lg border border-brand-border-light cursor-pointer transition-transform hover:scale-105"
+                  className="absolute bottom-0 right-0 p-1.5 bg-brand-accent hover:brightness-110 text-brand-text rounded-full shadow-lg border border-brand-border-light cursor-pointer transition-transform hover:scale-105"
                   title="Cambiar avatar"
                 >
-                  <Camera className="w-4 h-4" />
+                  <Camera className="w-3.5 h-3.5" />
                 </button>
                 <input
                   ref={fileInputRef}
@@ -245,8 +245,8 @@ export default function ProfilePage() {
               </div>
 
               {/* Selector Rápido de Galería de Avatares */}
-              <div className="flex flex-col items-center space-y-2">
-                <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">O elige un avatar rápido</span>
+              <div className="flex flex-col space-y-1.5">
+                <span className="text-[9px] font-bold text-brand-muted uppercase tracking-wider">O elige un avatar rápido</span>
                 <div className="flex gap-2">
                   {PRESET_AVATARS.map((avatar, idx) => (
                     <button
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                         setFotoUrl(avatar);
                         setAvatarFile(null);
                       }}
-                      className={`w-10 h-10 rounded-full overflow-hidden border-2 cursor-pointer transition-all ${
+                      className={`w-9 h-9 rounded-full overflow-hidden border-2 cursor-pointer transition-all ${
                         fotoUrl === avatar ? 'border-brand-accent scale-105' : 'border-transparent hover:border-brand-muted/40'
                       }`}
                     >
@@ -268,14 +268,14 @@ export default function ProfilePage() {
             </div>
 
             {/* Input Nombre */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider">Nombre completo</label>
               <input
                 type="text"
                 placeholder="Tu nombre completo"
                 value={nombreCompleto}
                 onChange={(e) => setNombreCompleto(e.target.value)}
-                className={`w-full bg-[#131c31] border rounded-xl py-2.5 px-3.5 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
+                className={`w-full bg-[#131c31] border rounded-xl py-2 px-3 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
                   profileErrors.nombre_completo
                     ? 'border-red-500/60 focus:border-red-500'
                     : 'border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent'
@@ -290,26 +290,26 @@ export default function ProfilePage() {
             </div>
 
             {/* Input Correo (Deshabilitado) */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider">Correo electrónico (Solo lectura)</label>
               <div className="relative">
                 <input
                   type="email"
                   disabled
                   value={user?.correo || ''}
-                  className="w-full border border-brand-border-dark/60 rounded-xl py-2.5 pl-10 pr-3.5 text-sm text-brand-muted cursor-not-allowed outline-none"
+                  className="w-full border border-brand-border-dark/60 rounded-xl py-2 pl-10 pr-3.5 text-sm text-brand-muted cursor-not-allowed outline-none"
                 />
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-brand-muted/30" />
               </div>
             </div>
 
             {/* Selector de Carrera */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider">Carrera profesional</label>
               <select
                 value={carrera}
                 onChange={(e) => setCarrera(e.target.value)}
-                className="w-full bg-[#131c31] border border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent rounded-xl py-2.5 px-3.5 text-sm text-brand-text outline-none cursor-pointer appearance-none"
+                className="w-full bg-[#131c31] border border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent rounded-xl py-2 px-3 text-sm text-brand-text outline-none cursor-pointer appearance-none animate-none"
               >
                 {carreras.map((c) => (
                   <option key={c} value={c} className="bg-brand-card">
@@ -320,11 +320,11 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="pt-3">
             <button
               type="submit"
               disabled={isUpdatingProfile}
-              className="glow-btn-primary w-full py-3 px-4 rounded-xl text-sm font-semibold text-brand-text shadow-lg cursor-pointer flex items-center justify-center space-x-2"
+              className="glow-btn-primary w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-brand-text shadow-lg cursor-pointer flex items-center justify-center space-x-2"
             >
               {isUpdatingProfile ? (
                 <>
@@ -345,15 +345,15 @@ export default function ProfilePage() {
         </form>
 
         {/* Columna Derecha: Seguridad */}
-        <form onSubmit={handleUpdatePassword} className="rounded-2xl border border-brand-border-dark bg-brand-card p-6 space-y-6 shadow-xl flex flex-col justify-between">
-          <div className="space-y-6">
+        <form onSubmit={handleUpdatePassword} className="rounded-2xl border border-brand-border-dark bg-brand-card p-4 lg:p-5 space-y-4 shadow-xl flex flex-col justify-between">
+          <div className="space-y-4">
             <div>
               <h2 className="text-base font-bold text-brand-text">Seguridad y Acceso</h2>
-              <div className="h-px bg-brand-border-dark/50 my-3"></div>
+              <div className="h-px bg-brand-border-dark/50 my-2"></div>
             </div>
 
             {/* Contraseña Actual */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider">Contraseña actual</label>
               <div className="relative">
                 <input
@@ -361,7 +361,7 @@ export default function ProfilePage() {
                   placeholder="••••••••"
                   value={claveActual}
                   onChange={(e) => setClaveActual(e.target.value)}
-                  className={`w-full bg-[#131c31] border rounded-xl py-2.5 pl-10 pr-10 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
+                  className={`w-full bg-[#131c31] border rounded-xl py-2 pl-10 pr-10 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
                     passwordErrors.clave_actual
                       ? 'border-red-500/60 focus:border-red-500'
                       : 'border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent'
@@ -385,7 +385,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Contraseña Nueva */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider">Nueva contraseña</label>
               <div className="relative">
                 <input
@@ -393,7 +393,7 @@ export default function ProfilePage() {
                   placeholder="••••••••"
                   value={claveNueva}
                   onChange={(e) => setClaveNueva(e.target.value)}
-                  className={`w-full bg-[#131c31] border rounded-xl py-2.5 pl-10 pr-10 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
+                  className={`w-full bg-[#131c31] border rounded-xl py-2 pl-10 pr-10 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
                     passwordErrors.clave_nueva
                       ? 'border-red-500/60 focus:border-red-500'
                       : 'border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent'
@@ -417,7 +417,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Confirmar Contraseña Nueva */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider">Confirmar nueva contraseña</label>
               <div className="relative">
                 <input
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                   placeholder="••••••••"
                   value={confirmarClave}
                   onChange={(e) => setConfirmarClave(e.target.value)}
-                  className={`w-full bg-[#131c31] border rounded-xl py-2.5 pl-10 pr-10 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
+                  className={`w-full bg-[#131c31] border rounded-xl py-2 pl-10 pr-10 text-sm text-brand-text placeholder-brand-muted/40 outline-none transition-all ${
                     passwordErrors.confirmar_clave
                       ? 'border-red-500/60 focus:border-red-500'
                       : 'border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent'
@@ -449,11 +449,11 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="pt-3">
             <button
               type="submit"
               disabled={isUpdatingPassword}
-              className="glow-btn-secondary w-full py-3 px-4 rounded-xl text-sm font-semibold text-brand-text shadow-lg cursor-pointer flex items-center justify-center space-x-2"
+              className="glow-btn-secondary w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-brand-text shadow-lg cursor-pointer flex items-center justify-center space-x-2"
             >
               {isUpdatingPassword ? (
                 <>
@@ -466,7 +466,7 @@ export default function ProfilePage() {
               ) : (
                 <>
                   <ShieldCheck className="w-4 h-4 shrink-0" />
-                  <span>Actualizar seguridad</span>
+                  <span>Actualizar contraseña</span>
                 </>
               )}
             </button>

@@ -17,6 +17,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.jpa.domain.Specification;
 import org.mockito.ArgumentMatchers;
+import com.david.backend.dto.response.MatchResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -292,4 +293,99 @@ public class ReportServiceTest {
         assertThrows(RuntimeException.class, () -> reportService.updateReport(testUser, 10L, request));
     }
 
+    @Test
+    void resolveReport_Success() {
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.save(any(Reporte.class))).thenReturn(testReport);
+
+        ReportResponse response = reportService.resolveReport(testUser, 10L);
+
+        assertNotNull(response);
+        assertEquals("CERRADO", testReport.getEstado());
+        verify(reporteRepository).save(testReport);
+    }
+
+    @Test
+    void resolveReport_NotFound_ThrowsException() {
+        when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> reportService.resolveReport(testUser, 999L));
+    }
+
+    @Test
+    void resolveReport_Forbidden_ThrowsException() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").build();
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.resolveReport(otherUser, 10L));
+    }
+
+    @Test
+    void resolveReport_AlreadyClosed_ThrowsException() {
+        testReport.setEstado("CERRADO");
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.resolveReport(testUser, 10L));
+    }
+
+    @Test
+    void getMatches_Success() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("iPhone 13")
+                .descripcion("Color negro, pantalla rota")
+                .lugar("Pabellón B")
+                .fechaIncidente(LocalDate.now())
+                .estado("ACTIVO")
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "ENCONTRADO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+
+        assertNotNull(results);
+        assertFalse(results.isEmpty());
+        assertTrue(results.get(0).getScore() >= 30.0);
+        assertEquals("iPhone 13", results.get(0).getNombreObjeto());
+    }
+
+    @Test
+    void getMatches_Forbidden_ThrowsException() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").build();
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.getMatches(otherUser, 10L));
+    }
+
+    @Test
+    void getMatches_ExcludesBelowThreshold() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        // Candidate has a completely different name/description, making the Jaccard score very low, and date is 29 days away.
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("Zapatos de vestir")
+                .descripcion("Encontré calzado formal negro")
+                .lugar("Comedor UNSCH")
+                .fechaIncidente(LocalDate.now().minusDays(29))
+                .estado("ACTIVO")
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "ENCONTRADO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+
+        assertNotNull(results);
+        assertTrue(results.isEmpty()); // Should be filtered out due to score < 30%
+    }
 }

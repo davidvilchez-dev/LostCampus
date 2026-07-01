@@ -20,4 +20,15 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long>, org.spr
            "LOWER(r.categoria.nombre) LIKE LOWER(CONCAT('%', :query, '%')) " +
            "ORDER BY r.createdAt DESC")
     Page<Reporte> buscarPorPalabraClave(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT r FROM Reporte r WHERE r.categoria.id = :categoriaId " +
+           "AND r.tipo = :tipo " +
+           "AND r.id <> :reportId " +
+           "AND r.usuario.id <> :usuarioId " +
+           "AND r.estado = 'ACTIVO'")
+    List<Reporte> findCandidatesForMatching(
+            @Param("categoriaId") Long categoriaId,
+            @Param("tipo") String tipo,
+            @Param("reportId") Long reportId,
+            @Param("usuarioId") Long usuarioId);
 }

@@ -56,10 +56,10 @@ export default function MyReportCard({ report, onEdit, onResolve, onDelete }: My
       <div className="relative aspect-video w-full overflow-hidden bg-brand-bg select-none">
         {/* Etiqueta de Tipo (Perdido/Encontrado) */}
         <span
-          className={`absolute top-4 left-4 z-10 px-3 py-1 text-xs font-semibold rounded-full border tracking-wide uppercase ${
+          className={`absolute top-4 left-4 z-10 px-3 py-1 text-xs font-bold rounded-full border tracking-wide uppercase shadow-md ${
             isPerdido
-              ? 'bg-red-500/10 text-red-400 border-red-500/20'
-              : 'bg-green-500/10 text-green-400 border-green-500/20'
+              ? 'bg-red-500 text-white border-red-600/20'
+              : 'bg-emerald-600 text-white border-emerald-700/20'
           }`}
         >
           {isPerdido ? 'Perdido' : 'Encontrado'}
@@ -69,10 +69,10 @@ export default function MyReportCard({ report, onEdit, onResolve, onDelete }: My
         <span
           className={`absolute top-4 right-4 z-10 px-2.5 py-0.5 text-xs font-bold rounded-md tracking-wide uppercase shadow-md ${
             isCerrado
-              ? 'bg-brand-border-light text-brand-muted'
+              ? 'bg-slate-800 text-slate-400 border border-slate-700/50'
               : isCoincidencia
-              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : 'bg-blue-500/25 text-blue-400 border border-blue-500/30'
+              ? 'bg-amber-500 text-slate-950 border border-amber-600/30'
+              : 'bg-blue-600 text-white border border-blue-700/30'
           }`}
         >
           {isCerrado ? 'Cerrado' : isCoincidencia ? 'Coincidencia Detectada' : 'Activo'}

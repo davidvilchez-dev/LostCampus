@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2 } from 'lucide-react';
-import { getReportById, deleteReport, type Reporte } from '../api/reportService';
+import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2, Sparkles } from 'lucide-react';
+import { getReportById, deleteReport, getSuggestedMatches, type Reporte, type MatchResponse } from '../api/reportService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/authStore';
 
@@ -14,14 +14,30 @@ export default function ReportDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [matches, setMatches] = useState<MatchResponse[]>([]);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
 
   useEffect(() => {
     async function loadReport() {
       if (!id) return;
       setIsLoading(true);
+      setMatches([]);
       try {
         const data = await getReportById(Number(id));
         setReport(data);
+
+        // Cargar coincidencias si el usuario es el dueño
+        if (user && data.autor_id === user.id) {
+          setIsLoadingMatches(true);
+          try {
+            const matchesData = await getSuggestedMatches(data.id);
+            setMatches(matchesData);
+          } catch (mErr) {
+            console.error('Error al cargar coincidencias sugeridas:', mErr);
+          } finally {
+            setIsLoadingMatches(false);
+          }
+        }
       } catch (err: any) {
         toast.error('No se pudo cargar el detalle del reporte o no existe.');
         navigate('/feed');
@@ -30,7 +46,7 @@ export default function ReportDetailPage() {
       }
     }
     loadReport();
-  }, [id, navigate]);
+  }, [id, navigate, user]);
 
   if (isLoading) {
     return (
@@ -175,13 +191,13 @@ export default function ReportDetailPage() {
               <div className="flex flex-wrap items-center gap-2.5">
                 {/* Tipo de Reporte */}
                 <span
-                  className={`px-3.5 py-1 text-xs font-bold rounded-full border tracking-wide uppercase ${
+                  className={`px-3.5 py-1 text-xs font-bold rounded-full border tracking-wide uppercase shadow-md ${
                     isPerdido
-                      ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                      : 'bg-green-500/10 text-green-400 border-green-500/20'
+                      ? 'bg-red-500 text-white border-red-600/20'
+                      : 'bg-emerald-600 text-white border-emerald-700/20'
                   }`}
                 >
-                  <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 ${isPerdido ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`}></span>
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 ${isPerdido ? 'bg-white animate-pulse' : 'bg-white'}`}></span>
                   {isPerdido ? 'Objeto Perdido' : 'Objeto Encontrado'}
                 </span>
 
@@ -287,6 +303,84 @@ export default function ReportDetailPage() {
         </div>
 
       </div>
+
+      {/* Sección de Coincidencias Sugeridas (Solo visible para el propietario) */}
+      {isOwner && (
+        <div className="bg-brand-bg-dark/80 border border-brand-border-dark/65 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-sm">
+          <div className="flex items-center space-x-3 border-b border-brand-border-dark/60 pb-4">
+            <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
+            <h2 className="text-lg md:text-xl font-bold text-brand-text">Coincidencias Sugeridas por IA</h2>
+            <span className="text-xxs font-medium px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full">
+              Beta Híbrido
+            </span>
+          </div>
+
+          {isLoadingMatches ? (
+            <div className="flex justify-center items-center py-10">
+              <Loader2 className="w-8 h-8 text-brand-accent animate-spin" />
+            </div>
+          ) : matches.length === 0 ? (
+            <div className="text-center py-8 text-brand-muted bg-[#101726]/20 border border-dashed border-brand-border-dark/50 rounded-2xl p-6">
+              <p className="text-sm font-medium">No se han detectado coincidencias automáticas en este momento.</p>
+              <p className="text-xs text-brand-muted/70 mt-1">El sistema sigue buscando reportes cruzados que coincidan con tu publicación.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {matches.map((match) => (
+                <div
+                  key={match.id}
+                  onClick={() => navigate(`/reporte/${match.id}`)}
+                  className="flex items-center space-x-4 bg-[#101726]/40 hover:bg-[#101726]/75 border border-brand-border-dark/60 hover:border-brand-accent/50 p-4 rounded-2xl transition-all cursor-pointer group shadow-sm"
+                >
+                  {/* Foto de portada */}
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-brand-border-dark/40 shrink-0 border border-brand-border-dark/50">
+                    {match.imagenes_urls && match.imagenes_urls.length > 0 ? (
+                      <img
+                        src={match.imagenes_urls[0]}
+                        alt={match.nombre_objeto}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-brand-muted/50 bg-brand-border-dark/20">
+                        <ImageOff className="w-6 h-6" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Detalles */}
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                        match.tipo === 'PERDIDO' ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'
+                      }`}>
+                        {match.tipo === 'PERDIDO' ? 'Objeto Perdido' : 'Objeto Encontrado'}
+                      </span>
+                      <span className="text-[10px] font-extrabold text-amber-400 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-full shrink-0">
+                        {match.score}% match
+                      </span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-brand-text truncate group-hover:text-brand-accent transition-colors">
+                      {match.nombre_objeto}
+                    </h3>
+
+                    <div className="flex items-center text-xxs text-brand-muted space-x-3">
+                      <span className="flex items-center truncate">
+                        <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                        {match.lugar}
+                      </span>
+                      <span className="flex items-center shrink-0">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {match.fecha_incidente}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   );
