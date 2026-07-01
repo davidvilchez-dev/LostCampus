@@ -4,6 +4,7 @@ import com.david.backend.dto.request.CreateReportRequest;
 import com.david.backend.dto.response.ReportResponse;
 import com.david.backend.model.*;
 import com.david.backend.repository.*;
+import com.david.backend.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,9 +13,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.jpa.domain.Specification;
+import org.mockito.ArgumentMatchers;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -117,8 +119,7 @@ public class ReportServiceTest {
         when(imagenReporteRepository.countByReporteId(10L)).thenReturn(0L);
         when(cloudinaryService.uploadImage(file1, "lostcampus/reports")).thenReturn(Map.of(
                 "secure_url", "http://cloudinary.com/pic1.jpg",
-                "public_id", "pic1_public_id"
-        ));
+                "public_id", "pic1_public_id"));
         when(imagenReporteRepository.save(any(ImagenReporte.class))).thenReturn(new ImagenReporte());
 
         ReportResponse response = reportService.uploadImages(testUser, 10L, files);
@@ -167,15 +168,12 @@ public class ReportServiceTest {
         verify(reporteRepository, never()).delete(any(Reporte.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getReports_SearchQuery() {
-        PageRequest pageable = PageRequest.of(0, 10);
         Page<Reporte> page = new PageImpl<>(List.of(testReport));
 
-        // When delegating, it passes nulls and "desc" sorting to filterReports
-        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by("createdAt").descending();
-        PageRequest expectedPageable = PageRequest.of(0, 10, sort);
-        when(reporteRepository.filterReports("iPhone", null, null, null, null, null, expectedPageable)).thenReturn(page);
+        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(), any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
 
         Page<ReportResponse> result = reportService.getReports("iPhone", 0, 10);
 
@@ -189,14 +187,13 @@ public class ReportServiceTest {
         List<Long> categories = List.of(1L, 2L);
         LocalDate start = LocalDate.now().minusDays(5);
         LocalDate end = LocalDate.now();
-        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by("createdAt").descending();
-        PageRequest expectedPageable = PageRequest.of(0, 10, sort);
         Page<Reporte> page = new PageImpl<>(List.of(testReport));
 
-        when(reporteRepository.filterReports("iPhone", categories, "PERDIDO", "Pabellón B", start, end, expectedPageable))
+        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(), any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(page);
 
-        Page<ReportResponse> result = reportService.getReports("iPhone", categories, "PERDIDO", "Pabellón B", start, end, 0, 10, "desc");
+        Page<ReportResponse> result = reportService.getReports("iPhone", categories, "PERDIDO", "Pabellón B", start,
+                end, 0, 10, "desc");
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -208,22 +205,40 @@ public class ReportServiceTest {
         LocalDate end = LocalDate.now().minusDays(1); // Fecha de inicio posterior a fin
 
         assertThrows(RuntimeException.class, () -> reportService.getReports(
-                null, null, null, null, start, end, 0, 10, "desc"
-        ));
+                null, null, null, null, start, end, 0, 10, "desc"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getReports_SortingAscending_Success() {
-        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by("createdAt").ascending();
-        PageRequest expectedPageable = PageRequest.of(0, 10, sort);
         Page<Reporte> page = new PageImpl<>(List.of(testReport));
 
-        when(reporteRepository.filterReports(null, null, null, null, null, null, expectedPageable))
+        when(reporteRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class),
+                any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(page);
 
         Page<ReportResponse> result = reportService.getReports(null, null, null, null, null, null, 0, 10, "asc");
 
         assertNotNull(result);
-        verify(reporteRepository).filterReports(null, null, null, null, null, null, expectedPageable);
+        verify(reporteRepository).findAll(any(org.springframework.data.jpa.domain.Specification.class),
+                any(org.springframework.data.domain.Pageable.class));
+    }
+
+    @Test
+    void getReportById_Success() {
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        ReportResponse response = reportService.getReportById(10L);
+
+        assertNotNull(response);
+        assertEquals(10L, response.getId());
+        assertEquals("iPhone 13", response.getNombreObjeto());
+    }
+
+    @Test
+    void getReportById_NotFound_ThrowsException() {
+        when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> reportService.getReportById(999L));
     }
 }

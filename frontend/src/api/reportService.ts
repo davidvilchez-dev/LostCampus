@@ -62,14 +62,36 @@ export async function getCategorias(): Promise<Categoria[]> {
   return response.data;
 }
 
+export interface ReportFilters {
+  q?: string;
+  categorias?: number[];
+  tipo?: 'PERDIDO' | 'ENCONTRADO' | '';
+  lugar?: string;
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  size?: number;
+  sort?: 'asc' | 'desc';
+}
+
 /**
- * Obtiene el feed paginado de reportes con búsqueda opcional.
- * GET /api/reports?q=&page=&size=
+ * Obtiene el feed paginado de reportes con búsqueda y filtros opcionales.
+ * GET /api/reports?q=&categorias=&tipo=&lugar=&start_date=&end_date=&page=&size=&sort=
  */
-export async function getReports(query = '', page = 0, size = 10): Promise<PageResponse<Reporte>> {
-  const response = await axiosClient.get<PageResponse<Reporte>>('reports', {
-    params: { q: query, page, size },
-  });
+export async function getReports(filters: ReportFilters = {}): Promise<PageResponse<Reporte>> {
+  const params: any = {
+    q: filters.q || undefined,
+    categorias: filters.categorias && filters.categorias.length > 0 ? filters.categorias.join(',') : undefined,
+    tipo: filters.tipo || undefined,
+    lugar: filters.lugar || undefined,
+    start_date: filters.start_date || undefined,
+    end_date: filters.end_date || undefined,
+    page: filters.page ?? 0,
+    size: filters.size ?? 100, // Por defecto obtenemos un lote grande para feed continuo
+    sort: filters.sort ?? 'desc',
+  };
+
+  const response = await axiosClient.get<PageResponse<Reporte>>('reports', { params });
   return response.data;
 }
 
@@ -79,6 +101,15 @@ export async function getReports(query = '', page = 0, size = 10): Promise<PageR
  */
 export async function getMyReports(): Promise<Reporte[]> {
   const response = await axiosClient.get<Reporte[]>('reports/mine');
+  return response.data;
+}
+
+/**
+ * HU-12: Obtiene el detalle de un reporte por su ID.
+ * GET /api/reports/{id}
+ */
+export async function getReportById(id: number): Promise<Reporte> {
+  const response = await axiosClient.get<Reporte>(`reports/${id}`);
   return response.data;
 }
 

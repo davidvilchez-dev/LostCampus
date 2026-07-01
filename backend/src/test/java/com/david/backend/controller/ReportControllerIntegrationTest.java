@@ -176,4 +176,30 @@ public class ReportControllerIntegrationTest {
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].nombre_objeto").value("Mochila negra"));
     }
+
+    @Test
+    void getReportById_Success() throws Exception {
+        Reporte report = Reporte.builder()
+                .usuario(testUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("Mochila azul")
+                .descripcion("Marca Jansport")
+                .lugar("Laboratorio")
+                .fechaIncidente(LocalDate.now())
+                .build();
+        report = reporteRepository.save(report);
+
+        mockMvc.perform(get("/api/reports/" + report.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.nombre_objeto").value("Mochila azul"))
+                .andExpect(jsonPath("$.descripcion").value("Marca Jansport"));
+    }
+
+    @Test
+    void getReportById_NotFound_Returns404() throws Exception {
+        mockMvc.perform(get("/api/reports/999999"))
+                .andExpect(status().isNotFound());
+    }
 }

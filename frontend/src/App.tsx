@@ -10,6 +10,7 @@ import MyReportsPage from './pages/MyReportsPage';
 import ProfilePage from './pages/ProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ReportDetailPage from './pages/ReportDetailPage';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
         {/* Rutas Protegidas del Dashboard */}
         <Route element={<DashboardLayout />}>
           <Route path="/feed" element={<FeedPage />} />
+          <Route path="/reporte/:id" element={<ReportDetailPage />} />
           <Route path="/reportar" element={<CreateReportPage />} />
           <Route path="/mis-reportes" element={<MyReportsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />

@@ -4,6 +4,7 @@ import com.david.backend.dto.request.CreateReportRequest;
 import com.david.backend.dto.response.ReportResponse;
 import com.david.backend.model.*;
 import com.david.backend.repository.*;
+import com.david.backend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -112,8 +113,6 @@ public class ReportService {
             throw new RuntimeException("La fecha de inicio debe ser anterior o igual a la fecha de fin.");
         }
 
-        List<Long> cats = (categoriaIds != null && !categoriaIds.isEmpty()) ? categoriaIds : null;
-
         org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by("createdAt");
         if ("asc".equalsIgnoreCase(sortDirection)) {
             sort = sort.ascending();
@@ -122,17 +121,54 @@ public class ReportService {
         }
 
         org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Reporte> reportes = reporteRepository.filterReports(
-                (query != null && !query.isBlank()) ? query.trim() : null,
-                cats,
-                (tipo != null && !tipo.isBlank()) ? tipo.toUpperCase().trim() : null,
-                (lugar != null && !lugar.isBlank()) ? lugar.trim() : null,
-                startDate,
-                endDate,
-                pageable
-        );
 
+        org.springframework.data.jpa.domain.Specification<Reporte> spec = (root, q, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (query != null && !query.isBlank()) {
+                String val = "%" + query.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("nombreObjeto")), val),
+                        cb.like(cb.lower(root.get("descripcion")), val),
+                        cb.like(cb.lower(root.get("categoria").get("nombre")), val)
+                ));
+            }
+
+            if (categoriaIds != null && !categoriaIds.isEmpty()) {
+                predicates.add(root.get("categoria").get("id").in(categoriaIds));
+            }
+
+            if (tipo != null && !tipo.isBlank()) {
+                predicates.add(cb.equal(root.get("tipo"), tipo.toUpperCase().trim()));
+            }
+
+            if (lugar != null && !lugar.isBlank()) {
+                String val = "%" + lugar.trim().toLowerCase() + "%";
+                predicates.add(cb.like(cb.lower(root.get("lugar")), val));
+            }
+
+            if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("fechaIncidente"), startDate));
+            }
+
+            if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("fechaIncidente"), endDate));
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        Page<Reporte> reportes = reporteRepository.findAll(spec, pageable);
         return reportes.map(ReportResponse::fromEntity);
+    }
+
+    /**
+     * HU-12: Obtener reporte por ID
+     */
+    public ReportResponse getReportById(Long id) {
+        Reporte reporte = reporteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado."));
+        return ReportResponse.fromEntity(reporte);
     }
 
     /**

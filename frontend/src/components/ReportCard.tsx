@@ -1,4 +1,5 @@
 import { MapPin, Clock, Laptop, BookOpen, Key, Shirt, HelpCircle } from 'lucide-react';
+import { Link } from 'react-router';
 
 export interface Report {
   id: number;
@@ -39,7 +40,10 @@ export default function ReportCard({ report }: ReportCardProps) {
   const firstImageUrl = report.imagenes_urls && report.imagenes_urls.length > 0 ? report.imagenes_urls[0] : undefined;
 
   return (
-    <div className="group rounded-2xl bg-brand-card border border-brand-border-dark overflow-hidden flex flex-col hover:border-brand-accent/40 hover:shadow-[0_8px_30px_rgb(59,130,246,0.12)] transition-all duration-300 transform hover:-translate-y-1">
+    <Link
+      to={`/reporte/${report.id}`}
+      className="group rounded-2xl bg-brand-card border border-brand-border-dark overflow-hidden flex flex-col hover:border-brand-accent/40 hover:shadow-[0_8px_30px_rgb(59,130,246,0.12)] transition-all duration-300 transform hover:-translate-y-1"
+    >
       
       {/* Contenedor de Imagen o Placeholder */}
       <div className="relative aspect-video w-full overflow-hidden bg-brand-bg select-none">
@@ -106,6 +110,6 @@ export default function ReportCard({ report }: ReportCardProps) {
         </div>
       </div>
 
-    </div>
+    </Link>
   );
 }

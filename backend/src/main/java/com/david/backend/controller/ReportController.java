@@ -67,6 +67,14 @@ public class ReportController {
     }
 
     /**
+     * HU-12: GET /api/reports/{id}
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ReportResponse> getReportById(@PathVariable Long id) {
+        return ResponseEntity.ok(reportService.getReportById(id));
+    }
+
+    /**
      * GET /api/reports/mine
      */
     @GetMapping("/mine")
