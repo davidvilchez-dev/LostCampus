@@ -305,8 +305,8 @@ public class ReportService {
             // Puntuación combinada
             double totalScore = (textScore * 0.60) + (placeScore * 0.25) + (timeScore * 0.15);
 
-            // Filtrar bajo el umbral del 30%
-            if (totalScore >= 0.30) {
+            // Filtrar bajo el umbral del 25%
+            if (totalScore >= 0.25) {
                 // Redondear porcentaje
                 double roundedPercentage = Math.round(totalScore * 1000.0) / 10.0;
                 ReportResponse reportResponse = ReportResponse.fromEntity(candidate);
