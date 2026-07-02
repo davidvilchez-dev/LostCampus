@@ -51,6 +51,6 @@ Este es el tablero central de control para el desarrollo ágil de la plataforma 
 | **HU-16** | Marcar reporte como recuperado | Gestión de Reportes | Media | 2 | `specs/012-mark-recovered/` | 🟢 Completado |
 | **HU-17** | Detección automática de coincidencias | Coincidencias | Alta | 13 | `specs/013-matching-detection/`| 🟢 Completado |
 | **HU-18** | Consultar lista de coincidencias sugeridas | Coincidencias | Alta | 3 | `specs/014-matching-list/` | 🟢 Completado |
-| **HU-19** | Enviar solicitud de reclamación | Solicitudes | Alta | 5 | `specs/012-claim-requests/` | 🟡 En Desarrollo |
-| **HU-20** | Gestionar solicitudes de reclamación recibidas | Solicitudes | Alta | 5 | `specs/012-claim-requests/` | 🟡 En Desarrollo |
-| **HU-21** | Proveer información adicional de propiedad | Solicitudes | Media | 3 | `specs/012-claim-requests/` | 🟡 En Desarrollo |
+| **HU-19** | Enviar solicitud de reclamación | Solicitudes | Alta | 5 | `specs/012-claim-requests/` | 🟢 Completado |
+| **HU-20** | Gestionar solicitudes de reclamación recibidas | Solicitudes | Alta | 5 | `specs/012-claim-requests/` | 🟢 Completado |
+| **HU-21** | Proveer información adicional de propiedad | Solicitudes | Media | 3 | `specs/012-claim-requests/` | 🟢 Completado |
