@@ -169,12 +169,12 @@ public class ReportServiceTest {
         verify(reporteRepository, never()).delete(any(Reporte.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void getReports_SearchQuery() {
         Page<Reporte> page = new PageImpl<>(List.of(testReport));
 
-        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(), any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
+        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(),
+                any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
 
         Page<ReportResponse> result = reportService.getReports("iPhone", 0, 10);
 
@@ -190,7 +190,8 @@ public class ReportServiceTest {
         LocalDate end = LocalDate.now();
         Page<Reporte> page = new PageImpl<>(List.of(testReport));
 
-        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(), any(org.springframework.data.domain.Pageable.class)))
+        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(),
+                any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(page);
 
         Page<ReportResponse> result = reportService.getReports("iPhone", categories, "PERDIDO", "Pabellón B", start,
@@ -366,7 +367,8 @@ public class ReportServiceTest {
     @Test
     void getMatches_ExcludesBelowThreshold() {
         Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
-        // Candidate has a completely different name/description, making the Jaccard score very low, and date is 29 days away.
+        // Candidate has a completely different name/description, making the Jaccard
+        // score very low, and date is 29 days away.
         Reporte candidate = Reporte.builder()
                 .id(20L)
                 .usuario(otherUser)
