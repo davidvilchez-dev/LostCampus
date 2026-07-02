@@ -13,6 +13,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ReportDetailPage from './pages/ReportDetailPage';
 import EditReportPage from './pages/EditReportPage';
 import MatchesPage from './pages/MatchesPage';
+import ClaimsPage from './pages/ClaimsPage';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/reportar" element={<CreateReportPage />} />
           <Route path="/mis-reportes" element={<MyReportsPage />} />
           <Route path="/coincidencias" element={<MatchesPage />} />
+          <Route path="/solicitudes" element={<ClaimsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
         </Route>
       </Routes>
