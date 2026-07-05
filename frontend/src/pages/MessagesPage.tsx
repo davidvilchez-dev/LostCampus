@@ -4,6 +4,7 @@ import useAuthStore from '../store/authStore';
 import { Client } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
 import { Send, Paperclip, Search, AlertCircle, CheckCircle, MessageSquare } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function MessagesPage() {
   const { user, token } = useAuthStore();
@@ -14,6 +15,8 @@ export default function MessagesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
 
   const stompClientRef = useRef<Client | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -141,24 +144,25 @@ export default function MessagesPage() {
     }
   };
 
-  // 5. Confirmar entrega del objeto
-  const handleConfirmDelivery = async () => {
+  // 5. Confirmar entrega del objeto (abre modal de confirmación)
+  const handleConfirmDelivery = () => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleExecuteConfirmDelivery = async () => {
     if (!activeRoom) return;
-
-    const confirmAction = window.confirm(
-      '¿Estás seguro de confirmar la entrega? Esto marcará el objeto como RECUPERADO y el chat pasará a ser de SÓLO LECTURA.'
-    );
-
-    if (!confirmAction) return;
-
+    setIsConfirmingDelivery(true);
     try {
       const updatedRoom = await confirmDelivery(activeRoom.id);
       setActiveRoom(updatedRoom);
       fetchRooms(activeRoom.id);
       toast.success('¡Entrega confirmada exitosamente!');
+      setIsConfirmModalOpen(false);
     } catch (error: any) {
       const msg = error.response?.data?.error || 'No se pudo confirmar la entrega.';
       toast.error(msg);
+    } finally {
+      setIsConfirmingDelivery(false);
     }
   };
 
@@ -444,6 +448,18 @@ export default function MessagesPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleExecuteConfirmDelivery}
+        title="¿Confirmar entrega?"
+        message="¿Estás seguro de confirmar la entrega? Esto marcará el objeto como RECUPERADO y el chat pasará a ser de SÓLO LECTURA."
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+        type="warning"
+        isSubmitting={isConfirmingDelivery}
+      />
     </div>
   );
 }
