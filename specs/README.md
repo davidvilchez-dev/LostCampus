@@ -69,9 +69,8 @@ Este es el tablero central de control para el desarrollo ágil de la plataforma 
 | **HU-23** | Enviar y recibir mensajes en tiempo real | Chat y Estados | Alta | 5 | `specs/013-chat-and-states/` | 🟢 Completado |
 | **HU-24** | Persistencia del historial de chat | Chat y Estados | Alta | 3 | `specs/013-chat-and-states/` | 🟢 Completado |
 | **HU-25** | Confirmación de entrega del objeto | Chat y Estados | Alta | 3 | `specs/013-chat-and-states/` | 🟢 Completado |
-| **HU-26** | Sistema de notificaciones en tiempo real y campana | Notificaciones | Alta | 8 | `specs/014-notifications/` | 🟡 En Desarrollo |
-| **HU-27** | Transición automática de estados (`EN_PROCESO`/`RECUPERADO`) | Chat y Estados | Alta | 3 | `specs/013-chat-and-states/` | 🟢 Completado |
-| **HU-28** | Panel administrativo: Moderación de reportes | Administración | Media | 5 | `specs/015-admin-panel/` | 🔴 Pendiente |
-| **HU-29** | Panel administrativo: Gestión de categorías | Administración | Media | 3 | `specs/015-admin-panel/` | 🔴 Pendiente |
-| **HU-30** | Panel administrativo: Dashboard de estadísticas | Administración | Baja | 3 | `specs/015-admin-panel/` | 🔴 Pendiente |
+| **HU-26** | Sistema de notificaciones en tiempo real y campana | Notificaciones | Alta | 8 | `specs/014-notifications/` | 🟢 Completado |
+| **HU-27** | Gestión automática de estados de reportes | Estados | Alta | 5 | `specs/015-admin-and-states/` | 🟢 Completado |
+| **HU-28** | Cierre manual de reporte | Estados | Media | 2 | `specs/015-admin-and-states/` | 🟢 Completado |
+| **HU-29** | Módulo de administración y auditoría | Administración | Media | 5 | `specs/015-admin-and-states/` | 🟢 Completado |
 
