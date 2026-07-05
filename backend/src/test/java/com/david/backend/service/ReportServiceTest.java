@@ -399,4 +399,240 @@ public class ReportServiceTest {
         assertNotNull(results);
         assertTrue(results.isEmpty()); // Should be filtered out due to score < 30%
     }
+
+    @Test
+    void getMatches_ExcludesBeyond30Days() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("iPhone 13")
+                .descripcion("Color negro, pantalla rota")
+                .lugar("Pabellón B")
+                .fechaIncidente(LocalDate.now().minusDays(31))
+                .estado("ACTIVO")
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "ENCONTRADO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void getMatches_CampusBoost() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("iPhone 13")
+                .descripcion("Color negro, pantalla rota")
+                .lugar("Universidad UNSCH Pabellón C")
+                .fechaIncidente(LocalDate.now())
+                .estado("ACTIVO")
+                .build();
+
+        testReport.setLugar("Universidad UNSCH Pabellón B");
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "ENCONTRADO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+        assertFalse(results.isEmpty());
+        assertTrue(results.get(0).getScore() >= 30.0);
+    }
+
+    @Test
+    void getMatches_NullDescriptions() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        testReport.setDescripcion(null);
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("iPhone 13")
+                .descripcion(null)
+                .lugar("Pabellón B")
+                .fechaIncidente(LocalDate.now())
+                .estado("ACTIVO")
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "ENCONTRADO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+        assertNotNull(results);
+    }
+
+    @Test
+    void getMatches_OneNullDescription() {
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        // testReport has description, candidate has null
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("ENCONTRADO")
+                .nombreObjeto("iPhone 13")
+                .descripcion(null)
+                .lugar("Pabellón B")
+                .fechaIncidente(LocalDate.now())
+                .estado("ACTIVO")
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "ENCONTRADO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+        assertNotNull(results);
+    }
+
+    @Test
+    void getMatches_ENCONTRADOBaseType() {
+        // testReport is ENCONTRADO, so opposite type should be PERDIDO
+        testReport.setTipo("ENCONTRADO");
+        Usuario otherUser = Usuario.builder().id(2L).correo("other@unsch.edu.pe").nombreCompleto("Other User").build();
+        Reporte candidate = Reporte.builder()
+                .id(20L)
+                .usuario(otherUser)
+                .categoria(testCategory)
+                .tipo("PERDIDO")
+                .nombreObjeto("iPhone 13")
+                .descripcion("Color negro, pantalla rota")
+                .lugar("Pabellón B")
+                .fechaIncidente(LocalDate.now())
+                .estado("ACTIVO")
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.findCandidatesForMatching(1L, "PERDIDO", 10L, 1L))
+                .thenReturn(List.of(candidate));
+
+        List<MatchResponse> results = reportService.getMatches(testUser, 10L);
+        assertNotNull(results);
+        assertFalse(results.isEmpty());
+    }
+
+    @Test
+    void getMyReports_Success() {
+        when(reporteRepository.findByUsuarioIdOrderByCreatedAtDesc(1L))
+                .thenReturn(List.of(testReport));
+
+        List<ReportResponse> results = reportService.getMyReports(testUser);
+        assertNotNull(results);
+        assertEquals(1, results.size());
+        assertEquals("iPhone 13", results.get(0).getNombreObjeto());
+    }
+
+    @Test
+    void cerrarReporteManual_Success() {
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.save(any(Reporte.class))).thenReturn(testReport);
+        when(claimRepository.findByReporteIdAndEstado(10L, EstadoReclamacion.PENDIENTE))
+                .thenReturn(new ArrayList<>());
+
+        ReportResponse response = reportService.cerrarReporteManual(testUser, 10L);
+        assertNotNull(response);
+        assertEquals("CERRADO", testReport.getEstado());
+    }
+
+    @Test
+    void cerrarReporteManual_WithPendingClaims() {
+        Usuario claimant = Usuario.builder().id(5L).nombreCompleto("Claimant").build();
+        SolicitudReclamacion claim = SolicitudReclamacion.builder()
+                .id(1L)
+                .reporte(testReport)
+                .reclamante(claimant)
+                .estado(EstadoReclamacion.PENDIENTE)
+                .build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(reporteRepository.save(any(Reporte.class))).thenReturn(testReport);
+        when(claimRepository.findByReporteIdAndEstado(10L, EstadoReclamacion.PENDIENTE))
+                .thenReturn(List.of(claim));
+
+        ReportResponse response = reportService.cerrarReporteManual(testUser, 10L);
+        assertNotNull(response);
+        assertEquals(EstadoReclamacion.RECHAZADA, claim.getEstado());
+        verify(claimRepository).save(claim);
+        verify(notificationService).crearNotificacion(eq(claimant), any(), any(), any(), any());
+    }
+
+    @Test
+    void cerrarReporteManual_Forbidden() {
+        Usuario otherUser = Usuario.builder().id(99L).nombreCompleto("Otro").build();
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.cerrarReporteManual(otherUser, 10L));
+    }
+
+    @Test
+    void cerrarReporteManual_AlreadyClosed() {
+        testReport.setEstado("CERRADO");
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.cerrarReporteManual(testUser, 10L));
+    }
+
+    @Test
+    void cerrarReporteManual_AlreadyRecuperado() {
+        testReport.setEstado("RECUPERADO");
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        assertThrows(RuntimeException.class, () -> reportService.cerrarReporteManual(testUser, 10L));
+    }
+
+    @Test
+    void uploadImages_Forbidden() {
+        Usuario otherUser = Usuario.builder().id(99L).nombreCompleto("Otro").build();
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+
+        MockMultipartFile file1 = new MockMultipartFile("files", "pic.jpg", "image/jpeg", "content".getBytes());
+        assertThrows(RuntimeException.class, () -> reportService.uploadImages(otherUser, 10L, List.of(file1)));
+    }
+
+    @Test
+    void deleteReport_CloudinaryIOException() throws IOException {
+        ImagenReporte img = ImagenReporte.builder()
+                .id(1L)
+                .publicIdCloudinary("img_id")
+                .urlCloudinary("url")
+                .build();
+        testReport.getImagenes().add(img);
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        doThrow(new IOException("Cloud error")).when(cloudinaryService).deleteImage("img_id");
+
+        // Should NOT throw, just log the error
+        reportService.deleteReport(testUser, 10L);
+        verify(reporteRepository).delete(testReport);
+    }
+
+    @Test
+    void actualizarEstado_SameState_NoOp() {
+        testReport.setEstado("ACTIVO");
+        reportService.actualizarEstado(testReport, "ACTIVO");
+        verify(reporteRepository, never()).save(any());
+    }
+
+    @Test
+    void getReports_WithEstadoALL() {
+        Page<Reporte> page = new PageImpl<>(List.of(testReport));
+        when(reporteRepository.findAll(ArgumentMatchers.<Specification<Reporte>>any(),
+                any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
+
+        Page<ReportResponse> result = reportService.getReports(null, null, null, null, null, null, "ALL", 0, 10, "desc");
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
 }

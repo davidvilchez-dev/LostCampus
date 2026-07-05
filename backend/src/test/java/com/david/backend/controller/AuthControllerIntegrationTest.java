@@ -141,4 +141,70 @@ public class AuthControllerIntegrationTest {
                                 .andExpect(status().isBadRequest())
                                 .andExpect(jsonPath("$.error", containsString("Credenciales incorrectas")));
         }
+
+        @Test
+        void forgotPassword_Success() throws Exception {
+                Usuario user = Usuario.builder()
+                                .nombreCompleto("Maria Gomez")
+                                .correo("maria.forgot@unsch.edu.pe")
+                                .contrasenaHash(passwordEncoder.encode("password123"))
+                                .build();
+                usuarioRepository.save(user);
+
+                String json = "{\"correo\":\"maria.forgot@unsch.edu.pe\"}";
+
+                mockMvc.perform(post("/api/auth/forgot-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.mensaje", containsString("instrucciones de recuperación")));
+        }
+
+        @Test
+        void forgotPassword_NonexistentEmail_ReturnsError() throws Exception {
+                String json = "{\"correo\":\"noexiste@unsch.edu.pe\"}";
+
+                mockMvc.perform(post("/api/auth/forgot-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error", containsString("No se encontró una cuenta")));
+        }
+
+        @Test
+        void resetPassword_Success() throws Exception {
+                Usuario user = Usuario.builder()
+                                .nombreCompleto("Maria Reset")
+                                .correo("maria.reset@unsch.edu.pe")
+                                .contrasenaHash(passwordEncoder.encode("oldPassword"))
+                                .tokenRecuperacion("valid-token-123")
+                                .tokenExpiracion(java.time.LocalDateTime.now().plusMinutes(10))
+                                .build();
+                usuarioRepository.save(user);
+
+                String json = "{"
+                                + "\"token\":\"valid-token-123\","
+                                + "\"nueva_contrasena\":\"newSecurePassword\""
+                                + "}";
+
+                mockMvc.perform(post("/api/auth/reset-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.mensaje", containsString("restablecido correctamente")));
+        }
+
+        @Test
+        void resetPassword_InvalidToken_ReturnsError() throws Exception {
+                String json = "{"
+                                + "\"token\":\"invalid-token\","
+                                + "\"nueva_contrasena\":\"newSecurePassword\""
+                                + "}";
+
+                mockMvc.perform(post("/api/auth/reset-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error", containsString("token de recuperación")));
+        }
 }

@@ -56,6 +56,9 @@ public class UserControllerIntegrationTest {
         @Autowired
         private PasswordEncoder passwordEncoder;
 
+        @org.springframework.test.context.bean.override.mockito.MockitoBean
+        private com.david.backend.service.CloudinaryService cloudinaryService;
+
         private Usuario testUser;
         private String jwtToken;
 
@@ -111,5 +114,38 @@ public class UserControllerIntegrationTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.nombre_completo").value("David Vilchez Updated"))
                                 .andExpect(jsonPath("$.foto_url").value("http://example.com/new-avatar.jpg"));
+        }
+
+        @Test
+        void changePassword_Success() throws Exception {
+                String json = "{"
+                                + "\"contrasenaActual\":\"securePassword123\","
+                                + "\"nuevaContrasena\":\"newSecurePassword123\""
+                                + "}";
+
+                mockMvc.perform(put("/api/users/me/password")
+                                .header("Authorization", "Bearer " + jwtToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.mensaje").value("Contraseña actualizada correctamente."));
+        }
+
+        @Test
+        void uploadAvatar_Success() throws Exception {
+                java.util.Map<String, Object> mockResponse = new java.util.HashMap<>();
+                mockResponse.put("secure_url", "http://mock.url/avatar.png");
+                mockResponse.put("public_id", "avatar-123");
+
+                org.mockito.Mockito.when(cloudinaryService.uploadImage(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(mockResponse);
+
+                org.springframework.mock.web.MockMultipartFile file = new org.springframework.mock.web.MockMultipartFile(
+                                "file", "avatar.png", "image/png", "avatar-bytes".getBytes());
+
+                mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart("/api/users/me/avatar")
+                                .file(file)
+                                .header("Authorization", "Bearer " + jwtToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.foto_url").value("http://mock.url/avatar.png"));
         }
 }

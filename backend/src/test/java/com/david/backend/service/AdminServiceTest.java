@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -112,5 +112,59 @@ public class AdminServiceTest {
         assertNotNull(logs);
         assertEquals(1, logs.size());
         verify(logAuditoriaAdminRepository).findAllByOrderByFechaAccionDesc();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void getAdminReports_Success() {
+        org.springframework.data.domain.Page<com.david.backend.dto.response.ReportResponse> mockPage =
+                new org.springframework.data.domain.PageImpl<>(new ArrayList<>());
+        when(reportService.getReports(
+                any(), any(), any(), any(), any(), any(), eq("ALL"), anyInt(), anyInt(), any()
+        )).thenReturn(mockPage);
+
+        var result = adminService.getAdminReports(null, null, null, null, null, null, null, 0, 10, "desc");
+        assertNotNull(result);
+        verify(reportService).getReports(null, null, null, null, null, null, "ALL", 0, 10, "desc");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void getAdminReports_WithEstado() {
+        org.springframework.data.domain.Page<com.david.backend.dto.response.ReportResponse> mockPage =
+                new org.springframework.data.domain.PageImpl<>(new ArrayList<>());
+        when(reportService.getReports(
+                any(), any(), any(), any(), any(), any(), eq("ACTIVO"), anyInt(), anyInt(), any()
+        )).thenReturn(mockPage);
+
+        var result = adminService.getAdminReports(null, null, null, null, null, null, "ACTIVO", 0, 10, "desc");
+        assertNotNull(result);
+        verify(reportService).getReports(null, null, null, null, null, null, "ACTIVO", 0, 10, "desc");
+    }
+
+    @Test
+    void eliminarReporte_WithImagesAndChats() throws java.io.IOException {
+        ImagenReporte img = ImagenReporte.builder()
+                .id(1L)
+                .publicIdCloudinary("img_pub_id")
+                .urlCloudinary("url")
+                .build();
+        testReport.getImagenes().add(img);
+
+        ChatRoom room = ChatRoom.builder().id(100L).build();
+
+        when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+        when(chatRoomRepository.findByReporteId(10L)).thenReturn(List.of(room));
+        when(claimRepository.findByReporteIdAndEstado(eq(10L), any(EstadoReclamacion.class)))
+                .thenReturn(new ArrayList<>());
+        when(historialEstadoReporteRepository.findByReporteIdOrderByFechaCambioDesc(10L))
+                .thenReturn(new ArrayList<>());
+
+        adminService.eliminarReporte(adminUser, 10L, "Contenido inapropiado");
+
+        verify(cloudinaryService).deleteImage("img_pub_id");
+        verify(chatMessageRepository).deleteByChatRoomId(100L);
+        verify(chatRoomRepository).deleteAllInBatch(List.of(room));
+        verify(reporteRepository).delete(testReport);
     }
 }

@@ -429,4 +429,71 @@ public class ReportControllerIntegrationTest {
                                 .andExpect(jsonPath("$.error").value(
                                                 "No tienes permiso para ver las coincidencias de este reporte."));
         }
+
+        @Test
+        void getMyReports_Success() throws Exception {
+                Reporte report = Reporte.builder()
+                                .usuario(testUser)
+                                .categoria(testCategory)
+                                .tipo("PERDIDO")
+                                .nombreObjeto("Mi Laptop")
+                                .descripcion("Laptop gris")
+                                .lugar("Aula 101")
+                                .fechaIncidente(LocalDate.now())
+                                .build();
+                reporteRepository.save(report);
+
+                mockMvc.perform(get("/api/reports/mine")
+                                .header("Authorization", "Bearer " + jwtToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].nombre_objeto").value("Mi Laptop"));
+        }
+
+        @Test
+        void cerrarReporteManual_Success() throws Exception {
+                Reporte report = Reporte.builder()
+                                .usuario(testUser)
+                                .categoria(testCategory)
+                                .tipo("PERDIDO")
+                                .nombreObjeto("Mochila Azul")
+                                .descripcion("Una mochila azul")
+                                .lugar("Comedor")
+                                .fechaIncidente(LocalDate.now())
+                                .estado("ACTIVO")
+                                .build();
+                reporteRepository.save(report);
+
+                mockMvc.perform(put("/api/reports/" + report.getId() + "/cerrar")
+                                .header("Authorization", "Bearer " + jwtToken))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.estado").value("CERRADO"));
+        }
+
+        @Test
+        void cerrarReporteManual_Forbidden() throws Exception {
+                Reporte report = Reporte.builder()
+                                .usuario(testUser)
+                                .categoria(testCategory)
+                                .tipo("PERDIDO")
+                                .nombreObjeto("USB Kingston")
+                                .descripcion("USB azul")
+                                .lugar("Lab 2")
+                                .fechaIncidente(LocalDate.now())
+                                .estado("ACTIVO")
+                                .build();
+                reporteRepository.save(report);
+
+                Usuario otherUser = Usuario.builder()
+                                .nombreCompleto("Otro User")
+                                .correo("otro.cerrar@unsch.edu.pe")
+                                .contrasenaHash(passwordEncoder.encode("pass123"))
+                                .build();
+                usuarioRepository.save(otherUser);
+                String otherToken = jwtTokenProvider.generateToken(otherUser.getCorreo());
+
+                mockMvc.perform(put("/api/reports/" + report.getId() + "/cerrar")
+                                .header("Authorization", "Bearer " + otherToken))
+                                .andExpect(status().isBadRequest());
+        }
 }
