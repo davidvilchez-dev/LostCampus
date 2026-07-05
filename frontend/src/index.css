@@ -4,6 +4,7 @@
 /* CONFIGURACIÓN DEL TEMA DE TAILWIND CSS V4 */
 @theme {
   --color-brand-bg: #0b1326;
+  --color-brand-bg-dark: #060913;
   --color-brand-card: #111827;
   --color-brand-card-hover: #1f2937;
   --color-brand-accent: #3b82f6;

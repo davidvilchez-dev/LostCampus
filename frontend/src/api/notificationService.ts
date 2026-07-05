@@ -7,7 +7,7 @@ export interface Notificacion {
   tipo: 'RECLAMO_RECIBIDO' | 'RECLAMO_ACEPTADO' | 'RECLAMO_RECHAZADO' | 'CHAT_MENSAJE' | string;
   leido: boolean;
   enlace: string;
-  createdAt: string;
+  created_at: string;
 }
 
 /**

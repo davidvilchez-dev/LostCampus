@@ -74,7 +74,7 @@ export default function NotificationBell({
 
       {/* Menú Desplegable */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-brand-bg-dark/95 backdrop-blur-xl border border-brand-border-dark/60 rounded-2xl shadow-2xl overflow-hidden z-50 animate-fade-in-up">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-brand-bg-dark border border-brand-border-dark/80 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-fade-in-up">
           {/* Cabecera */}
           <div className="p-4 border-b border-brand-border-dark/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -128,7 +128,7 @@ export default function NotificationBell({
                       {notif.mensaje}
                     </p>
                     <p className="text-[10px] text-brand-accent-hover/80 mt-2 font-medium">
-                      {formatTimeAgo(notif.createdAt)}
+                      {formatTimeAgo(notif.created_at)}
                     </p>
                   </div>
                 </div>
