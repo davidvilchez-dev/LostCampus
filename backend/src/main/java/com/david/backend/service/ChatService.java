@@ -10,7 +10,6 @@ import com.david.backend.model.Reporte;
 import com.david.backend.model.Usuario;
 import com.david.backend.repository.ChatMessageRepository;
 import com.david.backend.repository.ChatRoomRepository;
-import com.david.backend.repository.ReporteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,7 +26,6 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final ReporteRepository reporteRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
     private final com.david.backend.event.WebSocketSubscriptionListener subscriptionListener;
@@ -49,7 +47,8 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public List<ChatRoomResponse> getRoomsForUser(Usuario usuario) {
-        List<ChatRoom> rooms = chatRoomRepository.findByCreadorReporteIdOrReclamanteIdOrderByCreatedAtDesc(usuario.getId(), usuario.getId());
+        List<ChatRoom> rooms = chatRoomRepository
+                .findByCreadorReporteIdOrReclamanteIdOrderByCreatedAtDesc(usuario.getId(), usuario.getId());
         return rooms.stream().map(room -> {
             boolean isCreator = room.getCreadorReporte().getId().equals(usuario.getId());
             Usuario interlocutor = isCreator ? room.getReclamante() : room.getCreadorReporte();
@@ -121,7 +120,8 @@ public class ChatService {
         // Broadcast messages over websocket
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, response);
 
-        // Disparar notificación inteligente si el interlocutor no está en la sala activa
+        // Disparar notificación inteligente si el interlocutor no está en la sala
+        // activa
         boolean isCreator = room.getCreadorReporte().getId().equals(usuario.getId());
         Usuario interlocutor = isCreator ? room.getReclamante() : room.getCreadorReporte();
 
@@ -131,8 +131,7 @@ public class ChatService {
                     "Nuevo mensaje de chat",
                     usuario.getNombreCompleto() + ": " + message.getContenido(),
                     "CHAT_MENSAJE",
-                    "/mensajes"
-            );
+                    "/mensajes");
         }
 
         return response;

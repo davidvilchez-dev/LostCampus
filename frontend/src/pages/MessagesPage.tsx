@@ -380,7 +380,7 @@ export default function MessagesPage() {
                                 : 'bg-[#18243e] text-brand-text border border-brand-border-dark/30 rounded-bl-none'
                             }`}
                           >
-                            <p className="whitespace-pre-wrap break-words">{m.contenido}</p>
+                            <p className="whitespace-pre-wrap wrap-break-word">{m.contenido}</p>
                           </div>
                           <span
                             className={`text-xxs text-brand-muted mt-1 block px-1 ${

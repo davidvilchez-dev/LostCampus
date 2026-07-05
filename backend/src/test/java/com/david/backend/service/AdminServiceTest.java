@@ -9,8 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +92,8 @@ public class AdminServiceTest {
     void eliminarReporte_Success() {
         when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
         when(chatRoomRepository.findByReporteId(10L)).thenReturn(new ArrayList<>());
-        when(claimRepository.findByReporteIdAndEstado(eq(10L), any(EstadoReclamacion.class))).thenReturn(new ArrayList<>());
+        when(claimRepository.findByReporteIdAndEstado(eq(10L), any(EstadoReclamacion.class)))
+                .thenReturn(new ArrayList<>());
         when(historialEstadoReporteRepository.findByReporteIdOrderByFechaCambioDesc(10L)).thenReturn(new ArrayList<>());
 
         adminService.eliminarReporte(adminUser, 10L, "Publicacion inapropiada");
@@ -105,7 +104,8 @@ public class AdminServiceTest {
 
     @Test
     void getAuditLogs_Success() {
-        when(logAuditoriaAdminRepository.findAllByOrderByFechaAccionDesc()).thenReturn(List.of(new LogAuditoriaAdmin()));
+        when(logAuditoriaAdminRepository.findAllByOrderByFechaAccionDesc())
+                .thenReturn(List.of(new LogAuditoriaAdmin()));
 
         List<LogAuditoriaAdmin> logs = adminService.getAuditLogs();
 

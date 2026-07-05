@@ -114,8 +114,7 @@ public class ReportService {
             String estado,
             int page,
             int size,
-            String sortDirection
-    ) {
+            String sortDirection) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new RuntimeException("La fecha de inicio debe ser anterior o igual a la fecha de fin.");
         }
@@ -137,8 +136,7 @@ public class ReportService {
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("nombreObjeto")), val),
                         cb.like(cb.lower(root.get("descripcion")), val),
-                        cb.like(cb.lower(root.get("categoria").get("nombre")), val)
-                ));
+                        cb.like(cb.lower(root.get("categoria").get("nombre")), val)));
             }
 
             if (categoriaIds != null && !categoriaIds.isEmpty()) {
@@ -221,9 +219,9 @@ public class ReportService {
         return ReportResponse.fromEntity(reporte);
     }
 
-
     /**
-     * HU-27: Actualizar estado de un reporte centralizadamente registrando en el historial
+     * HU-27: Actualizar estado de un reporte centralizadamente registrando en el
+     * historial
      */
     @org.springframework.transaction.annotation.Transactional
     public void actualizarEstado(Reporte reporte, String nuevoEstado) {
@@ -263,19 +261,19 @@ public class ReportService {
         actualizarEstado(reporte, "CERRADO");
 
         // Cancelar automáticamente todas las reclamaciones pendientes asociadas
-        List<SolicitudReclamacion> pendientes = claimRepository.findByReporteIdAndEstado(reporte.getId(), EstadoReclamacion.PENDIENTE);
+        List<SolicitudReclamacion> pendientes = claimRepository.findByReporteIdAndEstado(reporte.getId(),
+                EstadoReclamacion.PENDIENTE);
         for (SolicitudReclamacion claim : pendientes) {
             claim.setEstado(EstadoReclamacion.RECHAZADA);
             claimRepository.save(claim);
-            
+
             // Notificar al reclamante
             notificationService.crearNotificacion(
                     claim.getReclamante(),
                     "Solicitud de reclamación cancelada",
                     "El reporte '" + reporte.getNombreObjeto() + "' ha sido cerrado por su autor.",
                     "RECLAMO_RECHAZADO",
-                    "/solicitudes"
-            );
+                    "/solicitudes");
         }
 
         return ReportResponse.fromEntity(reporte);
@@ -349,19 +347,20 @@ public class ReportService {
         // Tipo opuesto
         String oppositeTipo = "PERDIDO".equalsIgnoreCase(reporteRef.getTipo()) ? "ENCONTRADO" : "PERDIDO";
 
-        // Obtener candidatos de la misma categoría, tipo opuesto, activos y excluyendo el propio reporte y autor
+        // Obtener candidatos de la misma categoría, tipo opuesto, activos y excluyendo
+        // el propio reporte y autor
         List<Reporte> candidates = reporteRepository.findCandidatesForMatching(
                 reporteRef.getCategoria().getId(),
                 oppositeTipo,
                 reporteRef.getId(),
-                usuario.getId()
-        );
+                usuario.getId());
 
         List<MatchResponse> matches = new ArrayList<>();
 
         for (Reporte candidate : candidates) {
             // 1. Similitud Temporal (15%): Máxima diferencia de 30 días
-            long daysBetween = Math.abs(ChronoUnit.DAYS.between(reporteRef.getFechaIncidente(), candidate.getFechaIncidente()));
+            long daysBetween = Math
+                    .abs(ChronoUnit.DAYS.between(reporteRef.getFechaIncidente(), candidate.getFechaIncidente()));
             if (daysBetween > 30) {
                 continue; // Supera la ventana temporal de 30 días
             }
@@ -371,8 +370,7 @@ public class ReportService {
             // Similitud de nombre por separado
             double nameScore = SimilarityUtils.calculateJaccardSimilarity(
                     reporteRef.getNombreObjeto().toLowerCase(),
-                    candidate.getNombreObjeto().toLowerCase()
-            );
+                    candidate.getNombreObjeto().toLowerCase());
             // Si el nombre es idéntico o muy similar, boost a 1.0
             if (nameScore >= 0.8) {
                 nameScore = 1.0;
@@ -380,7 +378,8 @@ public class ReportService {
 
             // Similitud de descripción por separado
             double descScore = 1.0;
-            String descRef = reporteRef.getDescripcion() != null ? reporteRef.getDescripcion().trim().toLowerCase() : "";
+            String descRef = reporteRef.getDescripcion() != null ? reporteRef.getDescripcion().trim().toLowerCase()
+                    : "";
             String descCand = candidate.getDescripcion() != null ? candidate.getDescripcion().trim().toLowerCase() : "";
             if (!descRef.isEmpty() && !descCand.isEmpty()) {
                 descScore = SimilarityUtils.calculateJaccardSimilarity(descRef, descCand);
@@ -393,11 +392,12 @@ public class ReportService {
             // 3. Similitud de Ubicación (25%)
             double placeScore = SimilarityUtils.calculateJaccardSimilarity(
                     reporteRef.getLugar().toLowerCase(),
-                    candidate.getLugar().toLowerCase()
-            );
+                    candidate.getLugar().toLowerCase());
             // Si ambas contienen "Universidad" o "UNSCH", dar un baseline de 0.85
-            boolean isSameCampus = (reporteRef.getLugar().toLowerCase().contains("universidad") || reporteRef.getLugar().toLowerCase().contains("unsch"))
-                    && (candidate.getLugar().toLowerCase().contains("universidad") || candidate.getLugar().toLowerCase().contains("unsch"));
+            boolean isSameCampus = (reporteRef.getLugar().toLowerCase().contains("universidad")
+                    || reporteRef.getLugar().toLowerCase().contains("unsch"))
+                    && (candidate.getLugar().toLowerCase().contains("universidad")
+                            || candidate.getLugar().toLowerCase().contains("unsch"));
             if (isSameCampus) {
                 placeScore = Math.max(placeScore, 0.85);
             }
