@@ -59,7 +59,7 @@ export default function RegisterPage() {
     });
 
     if (success) {
-      toast.success('¡Registro exitoso!');
+      toast.success('Cuenta creada');
       navigate('/login');
     } else {
       toast.error('Error al registrar');

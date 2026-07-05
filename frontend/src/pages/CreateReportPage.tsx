@@ -100,7 +100,6 @@ export default function CreateReportPage() {
         await uploadReportImages(reporte.id, images);
       }
 
-      toast.success('¡Reporte publicado exitosamente!');
       navigate('/feed');
     } catch (err: any) {
       const message = err.response?.data?.error || 'No se pudo publicar el reporte.';

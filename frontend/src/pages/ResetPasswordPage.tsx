@@ -69,7 +69,6 @@ export default function ResetPasswordPage() {
 
     try {
       await resetPassword({ token, nueva_contrasena: claveNueva });
-      toast.success('¡Contraseña restablecida correctamente!');
       navigate('/login');
     } catch (err: any) {
       const message = err.response?.data?.error || 'No se pudo restablecer la contraseña.';

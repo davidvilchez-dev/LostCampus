@@ -66,7 +66,7 @@ export default function MyReportsPage() {
         setModalConfig((prev) => ({ ...prev, isSubmitting: true }));
         try {
           await resolveReport(id);
-          toast.success(`¡Reporte "${report.nombre_objeto}" marcado como resuelto!`);
+          toast.success('Reporte completado');
           setReports((prev) =>
             prev.map((r) =>
               r.id === id
@@ -106,7 +106,7 @@ export default function MyReportsPage() {
         try {
           await deleteReport(id);
           setReports((prev) => prev.filter((r) => r.id !== id));
-          toast.success(`Reporte "${report.nombre_objeto}" eliminado con éxito.`);
+          toast.success('Reporte eliminado');
           setModalConfig((prev) => ({ ...prev, isOpen: false }));
         } catch (err: any) {
           toast.error('No se pudo eliminar el reporte.');

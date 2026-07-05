@@ -47,7 +47,6 @@ export default function ClaimsPage() {
     setSubmitting(true);
     try {
       await acceptClaim(confirmAcceptId);
-      toast.success('Solicitud aceptada. Se han intercambiado los datos de contacto.');
       setConfirmAcceptId(null);
       await loadClaims();
     } catch (err: any) {
@@ -62,7 +61,6 @@ export default function ClaimsPage() {
     setSubmitting(true);
     try {
       await rejectClaim(confirmRejectId);
-      toast.info('Solicitud rechazada.');
       setConfirmRejectId(null);
       await loadClaims();
     } catch (err: any) {
@@ -263,7 +261,6 @@ export default function ClaimsPage() {
                         onClick={() => {
                           const emailToCopy = isReceived ? claim.reclamante_email : claim.reporte_autor_email;
                           navigator.clipboard.writeText(emailToCopy);
-                          toast.success('Correo de contacto copiado.');
                         }}
                         className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-brand-text rounded-xl border border-slate-700/80 transition-all cursor-pointer text-xxs font-black flex items-center gap-1.5"
                       >

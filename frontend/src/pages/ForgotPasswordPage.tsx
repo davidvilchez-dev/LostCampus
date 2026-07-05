@@ -45,7 +45,6 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword({ correo });
       setIsSent(true);
-      toast.success('¡Enlace de recuperación enviado exitosamente!');
     } catch (err: any) {
       const message = err.response?.data?.error || 'No se pudo enviar el enlace de recuperación.';
       toast.error(message);

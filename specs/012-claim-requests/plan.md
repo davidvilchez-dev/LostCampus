@@ -1,16 +1,19 @@
 # Plan de Implementación: Solicitudes de reclamación de propiedad y evidencias (HU-19, HU-20, HU-21)
 
 **Historias de Usuario**:
-
 - `HU-19` Enviar solicitud de reclamación
 - `HU-20` Gestionar solicitudes de reclamación recibidas
 - `HU-21` Proveer información adicional de propiedad
 
 **Rama de Git**: `012-claim-requests`
 
+---
+
 ## 1. Objetivo
 
-Implementar la infraestructura y vistas para la reclamación de objetos encontrados dentro del campus. Esto abarca desde la creación de la entidad en el backend y el guardado de la evidencia, hasta el panel de control del usuario para gestionar reclamos entrantes e interactuar con el reclamante mediante el intercambio de correos de contacto al aceptar la solicitud.
+Implementar el flujo completo de reclamación de objetos encontrados en el campus. Permitirá a los reclamantes proveer una justificación/evidencia detallada para demostrar la propiedad del objeto y a los halladores gestionar las solicitudes (aceptar o rechazar). Al aceptar un reclamo, se revelan los datos de contacto y el reporte se cierra automáticamente.
+
+---
 
 ## 2. Estructura del Proyecto (Archivos a modificar y crear)
 
@@ -18,93 +21,104 @@ Implementar la infraestructura y vistas para la reclamación de objetos encontra
 backend/
 ├── src/main/java/com/david/backend/
 │   ├── dto/
-│   │   └── MatchResponse.java      <-- [NEW] DTO que extiende campos de reporte con score de similitud
+│   │   ├── request/
+│   │   │   └── CreateClaimRequest.java      <-- [NEW] DTO para los campos del reclamo
+│   │   └── response/
+│   │       └── ClaimResponse.java           <-- [NEW] DTO para el detalle del reclamo con datos de contacto
+│   ├── model/
+│   │   ├── EstadoReclamacion.java           <-- [NEW] Enum de estados: PENDIENTE, ACEPTADA, RECHAZADA
+│   │   └── SolicitudReclamacion.java        <-- [NEW] Entidad JPA de reclamaciones
 │   ├── repository/
-│   │   └── ReporteRepository.java  <-- [MODIFICAR] Añadir consulta de candidatos con filtros duros
+│   │   └── SolicitudReclamacionRepository.java <-- [NEW] Repositorio JPA para reclamos
 │   ├── service/
-│   │   └── ReportService.java      <-- [MODIFICAR] Implementar cálculo de score y búsqueda de coincidencias
-│   ├── util/
-│   │   └── SimilarityUtils.java    <-- [NEW] Utilidad para tokenización, eliminación de stop-words y Jaccard
+│   │   └── SolicitudReclamacionService.java <-- [NEW] Lógica de negocio (validación y transacciones)
 │   └── controller/
-│       └── ReportController.java   <-- [MODIFICAR] Agregar endpoint GET /api/reports/{id}/matches
+│       └── SolicitudReclamacionController.java <-- [NEW] Endpoints para gestionar reclamos
 └── src/test/java/com/david/backend/
     ├── service/
-    │   └── ReportServiceTest.java  <-- [MODIFICAR] Pruebas unitarias para coincidencias
+    │   └── SolicitudReclamacionServiceTest.java <-- [NEW] Pruebas unitarias para el servicio de reclamos
     └── controller/
-        └── ReportControllerIntegrationTest.java <-- [MODIFICAR] Pruebas de integración del endpoint /matches
+        └── SolicitudReclamacionControllerIntegrationTest.java <-- [NEW] Pruebas de integración MockMvc
 
 frontend/
 ├── src/
 │   ├── api/
-│   │   └── reportService.ts        <-- [MODIFICAR] Añadir getSuggestedMatches
-│   └── pages/
-│       └── ReportDetailPage.tsx    <-- [MODIFICAR] Cargar y renderizar la sección de coincidencias
+│   │   └── claimService.ts                  <-- [NEW] Cliente de API para reclamaciones
+│   ├── components/
+│   │   └── Sidebar.tsx                      <-- [MODIFICAR] Añadir enlace al dashboard de solicitudes
+│   ├── pages/
+│   │   ├── ClaimsPage.tsx                   <-- [NEW] Panel de solicitudes enviadas y recibidas
+│   │   └── ReportDetailPage.tsx             <-- [MODIFICAR] Integrar modal y botón de reclamar
+│   └── App.tsx                              <-- [MODIFICAR] Registrar ruta /solicitudes
 ```
+
+---
 
 ## 3. Detalle de Cambios
 
 ### Backend (Spring Boot)
 
-#### [NEW] `SimilarityUtils.java`
+#### [NEW] `EstadoReclamacion.java`
+- Definir un enum con los estados: `PENDIENTE`, `ACEPTADA`, `RECHAZADA`.
 
-- Implementar tokenización en español (remoción de acentos, caracteres especiales, stop-words de una lista estática).
-- Calcular coeficiente Jaccard: `intersection.size() / union.size()`.
+#### [NEW] `SolicitudReclamacion.java`
+- Entidad JPA con campos `id`, `reporte` (ManyToOne), `reclamante` (Usuario, ManyToOne), `mensajePrueba` (TEXT), `estado` (Enum), `createdAt` y `updatedAt`.
 
-#### [NEW] `MatchResponse.java`
+#### [NEW] `SolicitudReclamacionRepository.java`
+- Repositorio JPA con métodos de consulta por reclamante, por autor de reporte, y verificaciones de solicitudes previas.
 
-- Contendrá todos los campos de `ReportResponse` más un campo `Double score` (porcentaje de coincidencia, ej: `82.5%`).
+#### [NEW] `CreateClaimRequest.java`
+- DTO de entrada para validar el ID del reporte y el mensaje de prueba (mínimo 10 caracteres).
 
-#### [MODIFY] `ReporteRepository.java`
+#### [NEW] `ClaimResponse.java`
+- DTO de salida con los datos del reclamo, reporte y el intercambio seguro de correos.
 
-- Agregar query `@Query` para retornar reportes de misma categoría, tipo opuesto, que no pertenezcan al mismo autor y estén activos.
+#### [NEW] `SolicitudReclamacionService.java`
+- `enviarSolicitud(reclamante, request)`: Validaciones de negocio (tipo ENCONTRADO, reporte ACTIVO, no reclamar propio reporte, no duplicados) y guardado.
+- `listarEnviadas` / `listarRecibidas`: Consultas de listados.
+- `aceptarSolicitud(usuario, id)`: Aceptar reclamo, cerrar reporte (`CERRADO`), y rechazar de forma transaccional todos los demás reclamos pendientes.
+- `rechazarSolicitud(usuario, id)`: Cambiar estado a `RECHAZADA`.
 
-#### [MODIFY] `ReportService.java`
+#### [NEW] `SolicitudReclamacionController.java`
+- Exponer recursos de la API REST bajo `/api/reclamaciones`.
 
-- Implementar `getMatches(Usuario usuario, Long id)`:
-  - Recuperar reporte de referencia. Validar que el usuario sea el propietario.
-  - Cargar candidatos usando el repositorio.
-  - Para cada candidato, calcular:
-    - `textScore`: Jaccard de la combinación de nombre y descripción.
-    - `placeScore`: Jaccard del campo lugar.
-    - `timeScore`: Diferencia en días (de 0 a 30 días, linealizado a 1.0 - 0.0).
-    - `totalScore = (textScore * 0.6) + (placeScore * 0.25) + (timeScore * 0.15)`.
-  - Filtrar candidatos con `totalScore < 0.30`.
-  - Convertir a `MatchResponse` (multiplicando score por 100 y redondeando).
-  - Ordenar descendente y retornar.
-
-#### [MODIFY] `ReportController.java`
-
-- Exponer `@GetMapping("/{id}/matches")`.
+---
 
 ### Frontend (React)
 
-#### [MODIFY] `reportService.ts`
+#### [NEW] `claimService.ts`
+- Mapear servicios Axios para crear, listar y responder a solicitudes de reclamación.
 
-- Definir `MatchResponse` y exportar `getSuggestedMatches(id: number)`.
+#### [MODIFICAR] `Sidebar.tsx`
+- Añadir el botón en el menú lateral *"Solicitudes"* que redirija a `/solicitudes`.
 
-#### [MODIFY] `ReportDetailPage.tsx`
+#### [MODIFICAR] `App.tsx`
+- Definir la ruta `/solicitudes` apuntando a `ClaimsPage`.
 
-- Al cargar el reporte:
-  - Si el usuario activo es el dueño, llamar a `getSuggestedMatches(id)`.
-  - Renderizar una tarjeta o bloque de "Coincidencias Sugeridas".
-  - Cada coincidencia debe mostrar la foto, nombre, lugar, fecha y el badge con el porcentaje (ej: `75% de coincidencia`).
-  - Al hacer clic, navegar a la URL del reporte sugerido.
+#### [MODIFICAR] `ReportDetailPage.tsx`
+- Cargar solicitudes enviadas del usuario logueado en la carga inicial.
+- Si el usuario no es el autor y el reporte es de tipo `ENCONTRADO` y `ACTIVO`:
+  - Si ya tiene un reclamo enviado, mostrar un badge deshabilitado.
+  - Si no, mostrar el botón *"Reclamar Propiedad"*.
+- Abrir un modal premium para capturar el mensaje de justificación y enviarlo.
+
+#### [NEW] `ClaimsPage.tsx`
+- Crear el dashboard de reclamos dividido en pestañas ("Solicitudes Recibidas" y "Solicitudes Enviadas").
+- Mostrar la justificación descrita y habilitar botones rápidos de Aceptar y Rechazar (con confirmación de ConfirmModal).
+- Si la solicitud es Aceptada, revelar los datos de contacto y habilitar enlaces para copiar e iniciar correo.
+
+---
 
 ## 4. Plan de Verificación
 
 ### Pruebas Unitarias
-
-- `ReportServiceTest.java`:
-  - Validar cálculo correcto de score en diversos escenarios.
-  - Verificar exclusión de reportes inactivos o del mismo autor.
+- `SolicitudReclamacionServiceTest.java`: Verificar lógica de negocio, validaciones de envío y transaccionalidad de rechazos masivos automáticos.
 
 ### Pruebas de Integración
-
-- `ReportControllerIntegrationTest.java`:
-  - Probar `GET /api/reports/{id}/matches` confirmando estatus `200 OK` y formato de respuesta.
+- `SolicitudReclamacionControllerIntegrationTest.java`: Probar los endpoints REST del controlador mediante `MockMvc` con autenticación JWT.
 
 ### Pruebas Manuales
-
-1. Crear dos reportes relacionados (ej. uno perdido de "Llavero de cuero marrón" y otro encontrado de "Llavero de cuero con llaves").
-2. Navegar al detalle de uno de ellos y comprobar la visualización de la sección "Coincidencias Sugeridas".
-3. Verificar que al presionar la tarjeta navegue adecuadamente al reporte coincidente.
+1. Entrar como Usuario B y reportar un objeto como encontrado.
+2. Entrar como Usuario A, buscar el reporte de B, presionar "Reclamar Propiedad", detallar la justificación y enviar.
+3. Volver como Usuario B, ingresar al panel "Solicitudes", revisar el reclamo de A y aceptarlo.
+4. Comprobar el intercambio de correos y el cierre automático del reporte.

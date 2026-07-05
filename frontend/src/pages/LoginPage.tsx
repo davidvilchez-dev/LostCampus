@@ -50,7 +50,6 @@ export default function LoginPage() {
     });
 
     if (success) {
-      toast.success('¡Inicio de sesión exitoso!');
       navigate('/feed'); // Redirige al feed principal (se implementará en la siguiente spec)
     } else {
       toast.error('Credenciales incorrectas');

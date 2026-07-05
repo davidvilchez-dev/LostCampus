@@ -105,7 +105,6 @@ export default function FeedPage() {
     setEndDate('');
     setSort('desc');
     setDateError('');
-    toast.success('Filtros restablecidos.');
   };
 
   // Verificar si hay filtros activos para mostrar badge

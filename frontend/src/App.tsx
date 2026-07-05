@@ -38,7 +38,21 @@ function App() {
           <Route path="/perfil" element={<ProfilePage />} />
         </Route>
       </Routes>
-      <ToastContainer position="top-right" theme="dark" autoClose={2000} />
+      <ToastContainer
+        position="bottom-center"
+        theme="dark"
+        autoClose={1600}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover={false}
+        draggable
+        draggablePercent={30}
+        limit={3}
+        newestOnTop={false}
+        closeButton={false}
+        className="lc-toast-container"
+        toastClassName="lc-toast"
+      />
     </BrowserRouter>
   );
 }

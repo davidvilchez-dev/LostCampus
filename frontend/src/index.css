@@ -14,7 +14,7 @@
 }
 
 :root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   color-scheme: dark;
 }
 
@@ -257,6 +257,40 @@ body {
   background-color: var(--color-brand-bg) !important;
   color: var(--color-brand-text) !important;
   font-family: inherit;
+}
+
+/* Toast notifications */
+.lc-toast-container {
+  width: min(96vw, 460px) !important;
+  padding-bottom: 1rem !important;
+}
+
+.lc-toast {
+  border-radius: 1rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.92)) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42) !important;
+  padding: 0.9rem 1rem !important;
+}
+
+.lc-toast-body {
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.92rem !important;
+  line-height: 1.35 !important;
+  font-weight: 500 !important;
+}
+
+.Toastify__toast-icon {
+  width: 1.05rem !important;
+  margin-inline-end: 0.8rem !important;
+}
+
+.Toastify__progress-bar--dark {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
 }
 
 .leaflet-dark-mode .leaflet-bar {

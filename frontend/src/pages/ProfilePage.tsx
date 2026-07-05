@@ -84,7 +84,6 @@ export default function ProfilePage() {
       setAvatarFile(file);
       const localUrl = URL.createObjectURL(file);
       setFotoUrl(localUrl);
-      toast.success('Nueva foto cargada. No olvides guardar cambios.');
     }
   };
 
@@ -128,7 +127,7 @@ export default function ProfilePage() {
       // Sincronizar estado de Zustand
       updateProfile(nombreCompleto, finalFotoUrl);
       setAvatarFile(null);
-      toast.success('¡Perfil actualizado con éxito!');
+      toast.success('Perfil guardado');
     } catch (err: any) {
       const message = err.response?.data?.error || 'No se pudo actualizar el perfil.';
       toast.error(message);
@@ -180,7 +179,7 @@ export default function ProfilePage() {
       setClaveActual('');
       setClaveNueva('');
       setConfirmarClave('');
-      toast.success('¡Contraseña actualizada correctamente!');
+      toast.success('Contraseña actualizada');
     } catch (err: any) {
       const message = err.response?.data?.error || 'No se pudo actualizar la contraseña.';
       toast.error(message);

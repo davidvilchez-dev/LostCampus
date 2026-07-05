@@ -137,7 +137,6 @@ export default function EditReportPage() {
         fecha_incidente: fechaIncidente,
       });
 
-      toast.success('¡Reporte actualizado exitosamente!');
       navigate(`/reporte/${id}`);
     } catch (err: any) {
       const message = err.response?.data?.error || 'No se pudo actualizar el reporte.';

@@ -110,7 +110,6 @@ export default function ReportDetailPage() {
     setIsDeleting(true);
     try {
       await deleteReport(report.id);
-      toast.success('Reporte eliminado con éxito.');
       navigate('/mis-reportes');
     } catch (err: any) {
       toast.error('No se pudo eliminar el reporte.');
@@ -124,7 +123,6 @@ export default function ReportDetailPage() {
     setIsSubmittingClaim(true);
     try {
       await createClaim(report.id, claimMessage);
-      toast.success('Solicitud de reclamación enviada con éxito.');
       setHasClaimed(true);
       setClaimStatus('PENDIENTE');
       setIsClaimModalOpen(false);
