@@ -10,7 +10,7 @@ export interface MyReport {
   lugar: string;
   fecha_incidente: string;
   imagenes_urls: string[];
-  estado: 'ACTIVO' | 'COINCIDENCIA' | 'CERRADO';
+  estado: 'ACTIVO' | 'COINCIDENCIA' | 'EN_PROCESO' | 'RECUPERADO' | 'CERRADO';
   motivo_cierre?: string;
 }
 
@@ -68,14 +68,26 @@ export default function MyReportCard({ report, onEdit, onResolve, onDelete }: My
         {/* Etiqueta de Estado */}
         <span
           className={`absolute top-4 right-4 z-10 px-2.5 py-0.5 text-xs font-bold rounded-md tracking-wide uppercase shadow-md ${
-            isCerrado
+            report.estado === 'CERRADO'
               ? 'bg-slate-800 text-slate-400 border border-slate-700/50'
-              : isCoincidencia
+              : report.estado === 'RECUPERADO'
+              ? 'bg-emerald-600 text-white border border-emerald-700/30'
+              : report.estado === 'EN_PROCESO'
+              ? 'bg-orange-500 text-white border border-orange-600/30'
+              : report.estado === 'COINCIDENCIA'
               ? 'bg-amber-500 text-slate-950 border border-amber-600/30'
               : 'bg-blue-600 text-white border border-blue-700/30'
           }`}
         >
-          {isCerrado ? 'Cerrado' : isCoincidencia ? 'Coincidencia Detectada' : 'Activo'}
+          {report.estado === 'CERRADO'
+            ? 'Cerrado'
+            : report.estado === 'RECUPERADO'
+            ? 'Recuperado'
+            : report.estado === 'EN_PROCESO'
+            ? 'En Proceso'
+            : report.estado === 'COINCIDENCIA'
+            ? 'Coincidencia'
+            : 'Activo'}
         </span>
 
         {firstImageUrl ? (

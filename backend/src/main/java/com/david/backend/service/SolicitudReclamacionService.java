@@ -22,6 +22,7 @@ public class SolicitudReclamacionService {
 
     private final SolicitudReclamacionRepository claimRepository;
     private final ReporteRepository reportRepository;
+    private final ChatService chatService;
 
     @Transactional
     public ClaimResponse enviarSolicitud(Usuario reclamante, CreateClaimRequest request) {
@@ -99,10 +100,13 @@ public class SolicitudReclamacionService {
         claim.setEstado(EstadoReclamacion.ACEPTADA);
         claimRepository.save(claim);
 
-        // Cambiar el estado del reporte asociado a CERRADO
+        // Cambiar el estado del reporte asociado a EN_PROCESO
         Reporte reporte = claim.getReporte();
-        reporte.setEstado("CERRADO");
+        reporte.setEstado("EN_PROCESO");
         reportRepository.save(reporte);
+
+        // Crear la sala de chat privada automáticamente
+        chatService.createChatRoom(reporte, creadorReporte, claim.getReclamante());
 
         // Rechazar automáticamente el resto de reclamaciones pendientes de este reporte
         List<SolicitudReclamacion> otrasPendientes = claimRepository.findByReporteIdAndEstado(reporte.getId(), EstadoReclamacion.PENDIENTE);

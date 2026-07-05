@@ -36,6 +36,9 @@ public class SolicitudReclamacionServiceTest {
     @Mock
     private ReporteRepository reportRepository;
 
+    @Mock
+    private ChatService chatService;
+
     @InjectMocks
     private SolicitudReclamacionService claimService;
 
@@ -223,12 +226,13 @@ public class SolicitudReclamacionServiceTest {
         ClaimResponse response = claimService.aceptarSolicitud(autor, 100L);
 
         assertEquals(EstadoReclamacion.ACEPTADA, response.getEstado());
-        assertEquals("CERRADO", reporte.getEstado());
+        assertEquals("EN_PROCESO", reporte.getEstado());
         assertEquals(EstadoReclamacion.RECHAZADA, otraClaim.getEstado());
 
         verify(claimRepository).save(claim);
         verify(claimRepository).save(otraClaim);
         verify(reportRepository).save(reporte);
+        verify(chatService).createChatRoom(reporte, autor, reclamante);
     }
 
     @Test

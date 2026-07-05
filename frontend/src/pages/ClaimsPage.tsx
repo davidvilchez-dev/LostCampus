@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { 
   FileText, Loader2, ImageOff, MapPin, Calendar, 
-  Check, X as XIcon, Info, Mail, Copy, AlertCircle, FileCheck 
+  Check, X as XIcon, Info, Mail, Copy, AlertCircle, FileCheck, MessageSquare 
 } from 'lucide-react';
 import { 
   getSentClaims, getReceivedClaims, acceptClaim, rejectClaim, type Reclamacion 
@@ -177,7 +177,7 @@ export default function ClaimsPage() {
                 {/* Contenido Side-by-Side */}
                 <div className="flex flex-col md:flex-row gap-5">
                   {/* Foto de portada del reporte */}
-                  <div className="w-full md:w-36 aspect-[16/10] md:h-24 rounded-2xl overflow-hidden bg-brand-border-dark/40 shrink-0 border border-brand-border-dark/50">
+                  <div className="w-full md:w-36  md:h-24 rounded-2xl overflow-hidden bg-brand-border-dark/40 shrink-0 border border-brand-border-dark/50">
                     {claim.reporte_imagenes_urls && claim.reporte_imagenes_urls.length > 0 ? (
                       <img
                         src={claim.reporte_imagenes_urls[0]}
@@ -258,6 +258,13 @@ export default function ClaimsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
+                        onClick={() => navigate('/mensajes')}
+                        className="px-3.5 py-2 bg-brand-accent hover:bg-brand-accent-hover text-brand-text rounded-xl border border-brand-accent/80 transition-all cursor-pointer text-xxs font-black flex items-center gap-1.5"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        Ir al Chat
+                      </button>
+                      <button
                         onClick={() => {
                           const emailToCopy = isReceived ? claim.reclamante_email : claim.reporte_autor_email;
                           navigator.clipboard.writeText(emailToCopy);
@@ -290,7 +297,7 @@ export default function ClaimsPage() {
         onClose={() => setConfirmAcceptId(null)}
         onConfirm={handleAccept}
         title="Aceptar Reclamación"
-        message="¿Estás seguro de aceptar esta reclamación de propiedad? Al hacerlo, se marcará tu reporte de objeto encontrado como CERRADO, se rechazarán automáticamente otros reclamos pendientes y se compartirá tu correo de contacto con el reclamante."
+        message="¿Estás seguro de aceptar esta reclamación de propiedad? Al hacerlo, el estado de tu publicación cambiará a 'En proceso', se abrirá automáticamente una sala de chat privado con el reclamante para coordinar la entrega y se rechazarán otros reclamos pendientes."
         confirmText="Sí, aceptar reclamo"
         cancelText="Cancelar"
         type="info"

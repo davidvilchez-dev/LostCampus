@@ -84,7 +84,9 @@ export default function ReportDetailPage() {
   if (!report) return null;
 
   const isPerdido = report.tipo === 'PERDIDO';
-  const isRecuperado = report.estado === 'CERRADO';
+  const isEnProceso = report.estado === 'EN_PROCESO';
+  const isRecuperado = report.estado === 'RECUPERADO';
+  const isCerrado = report.estado === 'CERRADO';
   const hasImages = report.imagenes_urls && report.imagenes_urls.length > 0;
 
   const nextSlide = () => {
@@ -237,16 +239,30 @@ export default function ReportDetailPage() {
                   {isPerdido ? 'Objeto Perdido' : 'Objeto Encontrado'}
                 </span>
 
+                {/* Estado En Proceso */}
+                {isEnProceso && (
+                  <span className="px-3.5 py-1 text-xs font-bold rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 tracking-wide uppercase">
+                    En Proceso
+                  </span>
+                )}
+
                 {/* Estado de Recuperado */}
                 {isRecuperado && (
                   <span className="px-3.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 tracking-wide uppercase animate-pulse">
                     Recuperado
                   </span>
                 )}
+
+                {/* Estado de Cerrado */}
+                {isCerrado && (
+                  <span className="px-3.5 py-1 text-xs font-bold rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 tracking-wide uppercase">
+                    Cerrado
+                  </span>
+                )}
               </div>
 
               {/* Acciones de Propietario */}
-              {isOwner && !isRecuperado && (
+              {isOwner && report.estado === 'ACTIVO' && (
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={handleEdit}

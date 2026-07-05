@@ -13,7 +13,7 @@ export interface Categoria {
 export interface Reporte {
   id: number;
   tipo: 'PERDIDO' | 'ENCONTRADO';
-  estado: 'ACTIVO' | 'COINCIDENCIA' | 'CERRADO';
+  estado: 'ACTIVO' | 'COINCIDENCIA' | 'EN_PROCESO' | 'RECUPERADO' | 'CERRADO';
   nombre_objeto: string;
   descripcion: string;
   lugar: string;

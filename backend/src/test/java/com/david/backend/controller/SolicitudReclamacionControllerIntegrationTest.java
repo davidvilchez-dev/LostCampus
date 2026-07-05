@@ -202,7 +202,7 @@ public class SolicitudReclamacionControllerIntegrationTest {
                         .header("Authorization", "Bearer " + finderToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("ACEPTADA"))
-                .andExpect(jsonPath("$.reporte_estado").value("CERRADO"));
+                .andExpect(jsonPath("$.reporte_estado").value("EN_PROCESO"));
     }
 
     @Test
