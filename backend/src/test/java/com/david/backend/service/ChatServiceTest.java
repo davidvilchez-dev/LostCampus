@@ -45,6 +45,12 @@ public class ChatServiceTest {
     @Mock
     private SimpMessagingTemplate messagingTemplate;
 
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private com.david.backend.event.WebSocketSubscriptionListener subscriptionListener;
+
     @InjectMocks
     private ChatService chatService;
 

@@ -23,6 +23,7 @@ public class SolicitudReclamacionService {
     private final SolicitudReclamacionRepository claimRepository;
     private final ReporteRepository reportRepository;
     private final ChatService chatService;
+    private final NotificationService notificationService;
 
     @Transactional
     public ClaimResponse enviarSolicitud(Usuario reclamante, CreateClaimRequest request) {
@@ -62,6 +63,16 @@ public class SolicitudReclamacionService {
                 .build();
 
         SolicitudReclamacion savedClaim = claimRepository.save(claim);
+
+        // Notificar al dueño de la publicación
+        notificationService.crearNotificacion(
+                reporte.getUsuario(),
+                "Nueva solicitud de reclamación",
+                reclamante.getNombreCompleto() + " ha enviado un reclamo para tu reporte '" + reporte.getNombreObjeto() + "'.",
+                "RECLAMO_RECIBIDO",
+                "/solicitudes"
+        );
+
         return ClaimResponse.fromEntity(savedClaim);
     }
 
@@ -108,11 +119,28 @@ public class SolicitudReclamacionService {
         // Crear la sala de chat privada automáticamente
         chatService.createChatRoom(reporte, creadorReporte, claim.getReclamante());
 
+        // Notificar al reclamante
+        notificationService.crearNotificacion(
+                claim.getReclamante(),
+                "Solicitud de reclamación aceptada",
+                "Tu solicitud para reclamar '" + reporte.getNombreObjeto() + "' ha sido aceptada. Se ha abierto un chat para coordinar la entrega.",
+                "RECLAMO_ACEPTADO",
+                "/solicitudes"
+        );
+
         // Rechazar automáticamente el resto de reclamaciones pendientes de este reporte
         List<SolicitudReclamacion> otrasPendientes = claimRepository.findByReporteIdAndEstado(reporte.getId(), EstadoReclamacion.PENDIENTE);
         for (SolicitudReclamacion otra : otrasPendientes) {
             otra.setEstado(EstadoReclamacion.RECHAZADA);
             claimRepository.save(otra);
+
+            notificationService.crearNotificacion(
+                    otra.getReclamante(),
+                    "Solicitud de reclamación rechazada",
+                    "Tu solicitud para reclamar '" + reporte.getNombreObjeto() + "' ha sido rechazada.",
+                    "RECLAMO_RECHAZADO",
+                    "/solicitudes"
+            );
         }
 
         return ClaimResponse.fromEntity(claim);
@@ -136,6 +164,15 @@ public class SolicitudReclamacionService {
         // Rechazar la solicitud
         claim.setEstado(EstadoReclamacion.RECHAZADA);
         SolicitudReclamacion savedClaim = claimRepository.save(claim);
+
+        // Notificar al reclamante
+        notificationService.crearNotificacion(
+                claim.getReclamante(),
+                "Solicitud de reclamación rechazada",
+                "Tu solicitud para reclamar '" + claim.getReporte().getNombreObjeto() + "' ha sido rechazada.",
+                "RECLAMO_RECHAZADO",
+                "/solicitudes"
+        );
 
         return ClaimResponse.fromEntity(savedClaim);
     }

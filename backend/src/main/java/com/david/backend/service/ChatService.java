@@ -29,6 +29,8 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ReporteRepository reporteRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
+    private final com.david.backend.event.WebSocketSubscriptionListener subscriptionListener;
 
     @Transactional
     public ChatRoom createChatRoom(Reporte reporte, Usuario creador, Usuario reclamante) {
@@ -117,6 +119,20 @@ public class ChatService {
 
         // Broadcast messages over websocket
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, response);
+
+        // Disparar notificación inteligente si el interlocutor no está en la sala activa
+        boolean isCreator = room.getCreadorReporte().getId().equals(usuario.getId());
+        Usuario interlocutor = isCreator ? room.getReclamante() : room.getCreadorReporte();
+
+        if (!subscriptionListener.isUserActiveInChat(interlocutor.getId(), roomId)) {
+            notificationService.crearNotificacion(
+                    interlocutor,
+                    "Nuevo mensaje de chat",
+                    usuario.getNombreCompleto() + ": " + message.getContenido(),
+                    "CHAT_MENSAJE",
+                    "/mensajes"
+            );
+        }
 
         return response;
     }

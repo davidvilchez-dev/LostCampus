@@ -39,6 +39,9 @@ public class SolicitudReclamacionServiceTest {
     @Mock
     private ChatService chatService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private SolicitudReclamacionService claimService;
 

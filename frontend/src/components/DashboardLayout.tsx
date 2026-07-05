@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router';
-import { Bell, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Sidebar from './Sidebar';
 import useAuthStore from '../store/authStore';
+import NotificationBell from './NotificationBell';
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, type Notificacion } from '../api/notificationService';
+import { Client } from '@stomp/stompjs';
+import { toast } from 'react-toastify';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, token } = useAuthStore();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notificacion[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   // Redirigir al login si el usuario no está autenticado
   useEffect(() => {
@@ -15,6 +21,95 @@ export default function DashboardLayout() {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);
+
+  // Cargar notificaciones iniciales y configurar WebSocket
+  useEffect(() => {
+    if (!isAuthenticated || !user || !token) return;
+
+    const fetchInitialNotifications = async () => {
+      try {
+        const list = await getNotifications();
+        setNotifications(list);
+        const count = await getUnreadCount();
+        setUnreadCount(count);
+      } catch (e) {
+        console.error('Error al cargar notificaciones iniciales:', e);
+      }
+    };
+
+    fetchInitialNotifications();
+
+    const wsUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api')
+      .replace('/api', '/ws-chat')
+      .replace('http://', 'ws://')
+      .replace('https://', 'wss://');
+
+    const stompClient = new Client({
+      brokerURL: wsUrl,
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    stompClient.onConnect = () => {
+      console.log('WebSocket Connected to Notifications channel');
+      stompClient.subscribe(`/topic/notifications/${user.id}`, (message) => {
+        try {
+          const newNotif: Notificacion = JSON.parse(message.body);
+          setNotifications((prev) => [newNotif, ...prev.slice(0, 14)]);
+          setUnreadCount((c) => c + 1);
+
+          // Mostrar alerta Toast en pantalla
+          toast.info(
+            <div className="cursor-pointer">
+              <p className="font-bold text-xs">{newNotif.titulo}</p>
+              <p className="text-xxs mt-0.5">{newNotif.mensaje}</p>
+            </div>,
+            {
+              onClick: () => {
+                handleMarkAsRead(newNotif.id, newNotif.enlace);
+              }
+            }
+          );
+        } catch (err) {
+          console.error('Error parsing notification message', err);
+        }
+      });
+    };
+
+    stompClient.activate();
+
+    return () => {
+      stompClient.deactivate();
+    };
+  }, [isAuthenticated, user, token]);
+
+  const handleMarkAsRead = async (id: number, enlace: string) => {
+    try {
+      await markAsRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, leido: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+      navigate(enlace);
+    } catch (e) {
+      console.error('Error marking notification as read', e);
+      navigate(enlace);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, leido: true })));
+      setUnreadCount(0);
+    } catch (e) {
+      console.error('Error marking all notifications as read', e);
+    }
+  };
 
   if (!isAuthenticated) {
     return null; // Evitar parpadeos mientras redirige
@@ -80,12 +175,13 @@ export default function DashboardLayout() {
 
           {/* Notificaciones y Perfil */}
           <div className="flex items-center space-x-5">
-            {/* Botón de Campana */}
-            <button className="relative p-1.5 rounded-lg text-brand-muted hover:text-brand-text hover:bg-brand-card-hover/40 transition-colors cursor-pointer">
-              <Bell className="w-5.5 h-5.5" />
-              {/* Indicador de notificación roja */}
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            {/* Notificaciones Bell */}
+            <NotificationBell
+              notifications={notifications}
+              unreadCount={unreadCount}
+              onMarkAsRead={handleMarkAsRead}
+              onMarkAllAsRead={handleMarkAllAsRead}
+            />
 
             {/* Avatar del usuario */}
             <div className="flex items-center space-x-3">
