@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { 
   FileText, Loader2, ImageOff, MapPin, Calendar, 
-  Check, X as XIcon, Info, Mail, Copy, AlertCircle, FileCheck, MessageSquare 
+  Check, X as XIcon, Info, AlertCircle, FileCheck, MessageSquare 
 } from 'lucide-react';
 import { 
   getSentClaims, getReceivedClaims, acceptClaim, rejectClaim, type Reclamacion 
@@ -264,23 +264,6 @@ export default function ClaimsPage() {
                         <MessageSquare className="w-3.5 h-3.5" />
                         Ir al Chat
                       </button>
-                      <button
-                        onClick={() => {
-                          const emailToCopy = isReceived ? claim.reclamante_email : claim.reporte_autor_email;
-                          navigator.clipboard.writeText(emailToCopy);
-                        }}
-                        className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-brand-text rounded-xl border border-slate-700/80 transition-all cursor-pointer text-xxs font-black flex items-center gap-1.5"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        Copiar Correo
-                      </button>
-                      <a
-                        href={`mailto:${isReceived ? claim.reclamante_email : claim.reporte_autor_email}?subject=LostCampus - Recuperación de objeto: ${claim.reporte_nombre_objeto}`}
-                        className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all cursor-pointer text-xxs font-black flex items-center gap-1.5 shadow-md shadow-emerald-500/10"
-                      >
-                        <Mail className="w-3.5 h-3.5" />
-                        Enviar Correo
-                      </a>
                     </div>
                   </div>
                 )}
