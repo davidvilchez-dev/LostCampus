@@ -45,6 +45,15 @@ public class ReportServiceTest {
     @Mock
     private CloudinaryService cloudinaryService;
 
+    @Mock
+    private HistorialEstadoReporteRepository historialEstadoReporteRepository;
+
+    @Mock
+    private SolicitudReclamacionRepository claimRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ReportService reportService;
 
@@ -195,7 +204,7 @@ public class ReportServiceTest {
                 .thenReturn(page);
 
         Page<ReportResponse> result = reportService.getReports("iPhone", categories, "PERDIDO", "Pabellón B", start,
-                end, 0, 10, "desc");
+                end, null, 0, 10, "desc");
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -207,7 +216,7 @@ public class ReportServiceTest {
         LocalDate end = LocalDate.now().minusDays(1); // Fecha de inicio posterior a fin
 
         assertThrows(RuntimeException.class, () -> reportService.getReports(
-                null, null, null, null, start, end, 0, 10, "desc"));
+                null, null, null, null, start, end, null, 0, 10, "desc"));
     }
 
     @SuppressWarnings("unchecked")
@@ -219,7 +228,7 @@ public class ReportServiceTest {
                 any(org.springframework.data.domain.Pageable.class)))
                 .thenReturn(page);
 
-        Page<ReportResponse> result = reportService.getReports(null, null, null, null, null, null, 0, 10, "asc");
+        Page<ReportResponse> result = reportService.getReports(null, null, null, null, null, null, null, 0, 10, "asc");
 
         assertNotNull(result);
         verify(reporteRepository).findAll(any(org.springframework.data.jpa.domain.Specification.class),

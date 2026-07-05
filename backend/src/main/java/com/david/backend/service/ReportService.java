@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import com.david.backend.dto.response.MatchResponse;
@@ -25,6 +26,9 @@ public class ReportService {
     private final CategoriaRepository categoriaRepository;
     private final ImagenReporteRepository imagenReporteRepository;
     private final CloudinaryService cloudinaryService;
+    private final HistorialEstadoReporteRepository historialEstadoReporteRepository;
+    private final SolicitudReclamacionRepository claimRepository;
+    private final NotificationService notificationService;
 
     /**
      * HU-06/HU-07: Crear reporte (PERDIDO o ENCONTRADO)
@@ -94,7 +98,7 @@ public class ReportService {
      * HU-10: Búsqueda por palabras clave
      */
     public Page<ReportResponse> getReports(String query, int page, int size) {
-        return getReports(query, null, null, null, null, null, page, size, "desc");
+        return getReports(query, null, null, null, null, null, null, page, size, "desc");
     }
 
     /**
@@ -107,6 +111,7 @@ public class ReportService {
             String lugar,
             java.time.LocalDate startDate,
             java.time.LocalDate endDate,
+            String estado,
             int page,
             int size,
             String sortDirection
@@ -155,6 +160,15 @@ public class ReportService {
 
             if (endDate != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("fechaIncidente"), endDate));
+            }
+
+            if (estado != null && !estado.isBlank()) {
+                if (!"ALL".equalsIgnoreCase(estado)) {
+                    predicates.add(cb.equal(root.get("estado"), estado.toUpperCase().trim()));
+                }
+            } else {
+                // Por defecto, excluir reportes CERRADO y RECUPERADO del feed público
+                predicates.add(root.get("estado").in(List.of("ACTIVO", "EN_PROCESO")));
             }
 
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
@@ -209,8 +223,68 @@ public class ReportService {
 
 
     /**
+     * HU-27: Actualizar estado de un reporte centralizadamente registrando en el historial
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public void actualizarEstado(Reporte reporte, String nuevoEstado) {
+        String estadoAnterior = reporte.getEstado();
+        if (nuevoEstado.equalsIgnoreCase(estadoAnterior)) {
+            return;
+        }
+        reporte.setEstado(nuevoEstado.toUpperCase());
+        reporteRepository.save(reporte);
+
+        HistorialEstadoReporte historial = HistorialEstadoReporte.builder()
+                .reporte(reporte)
+                .estadoAnterior(estadoAnterior)
+                .estadoNuevo(nuevoEstado.toUpperCase())
+                .fechaCambio(LocalDateTime.now())
+                .build();
+        historialEstadoReporteRepository.save(historial);
+    }
+
+    /**
+     * HU-28: Cerrar reporte manualmente por el autor
+     */
+    @org.springframework.transaction.annotation.Transactional
+    public ReportResponse cerrarReporteManual(Usuario usuario, Long id) {
+        Reporte reporte = reporteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado."));
+
+        if (!reporte.getUsuario().getId().equals(usuario.getId())) {
+            throw new RuntimeException("No tienes permiso para cerrar este reporte.");
+        }
+
+        if ("CERRADO".equalsIgnoreCase(reporte.getEstado()) || "RECUPERADO".equalsIgnoreCase(reporte.getEstado())) {
+            throw new RuntimeException("El reporte ya no está activo.");
+        }
+
+        // Cambiar estado usando el método centralizado
+        actualizarEstado(reporte, "CERRADO");
+
+        // Cancelar automáticamente todas las reclamaciones pendientes asociadas
+        List<SolicitudReclamacion> pendientes = claimRepository.findByReporteIdAndEstado(reporte.getId(), EstadoReclamacion.PENDIENTE);
+        for (SolicitudReclamacion claim : pendientes) {
+            claim.setEstado(EstadoReclamacion.RECHAZADA);
+            claimRepository.save(claim);
+            
+            // Notificar al reclamante
+            notificationService.crearNotificacion(
+                    claim.getReclamante(),
+                    "Solicitud de reclamación cancelada",
+                    "El reporte '" + reporte.getNombreObjeto() + "' ha sido cerrado por su autor.",
+                    "RECLAMO_RECHAZADO",
+                    "/solicitudes"
+            );
+        }
+
+        return ReportResponse.fromEntity(reporte);
+    }
+
+    /**
      * HU-16: Marcar reporte como recuperado (resuelto)
      */
+    @org.springframework.transaction.annotation.Transactional
     public ReportResponse resolveReport(Usuario usuario, Long id) {
         Reporte reporte = reporteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reporte no encontrado."));
@@ -219,12 +293,11 @@ public class ReportService {
             throw new RuntimeException("No tienes permiso para modificar este reporte.");
         }
 
-        if ("CERRADO".equalsIgnoreCase(reporte.getEstado())) {
+        if ("CERRADO".equalsIgnoreCase(reporte.getEstado()) || "RECUPERADO".equalsIgnoreCase(reporte.getEstado())) {
             throw new RuntimeException("El reporte ya se encuentra resuelto.");
         }
 
-        reporte.setEstado("CERRADO");
-        reporteRepository.save(reporte);
+        actualizarEstado(reporte, "CERRADO");
         return ReportResponse.fromEntity(reporte);
     }
 

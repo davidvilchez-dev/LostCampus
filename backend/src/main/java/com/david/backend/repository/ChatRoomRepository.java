@@ -13,4 +13,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findByCreadorReporteIdOrReclamanteIdOrderByCreatedAtDesc(Long creadorId, Long reclamanteId);
 
     Optional<ChatRoom> findByReporteIdAndReclamanteId(Long reporteId, Long reclamanteId);
+
+    List<ChatRoom> findByReporteId(Long reporteId);
 }

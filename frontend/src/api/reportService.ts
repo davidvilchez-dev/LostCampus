@@ -180,5 +180,14 @@ export async function getSuggestedMatches(id: number): Promise<MatchResponse[]> 
   return response.data;
 }
 
+/**
+ * HU-28: Cierra un reporte manualmente.
+ * PUT /api/reports/{id}/cerrar
+ */
+export async function closeReport(id: number): Promise<Reporte> {
+  const response = await axiosClient.put<Reporte>(`reports/${id}/cerrar`);
+  return response.data;
+}
+
 
 

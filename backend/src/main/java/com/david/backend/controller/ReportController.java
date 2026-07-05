@@ -63,7 +63,7 @@ public class ReportController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "desc") String sort) {
         return ResponseEntity.ok(reportService.getReports(
-                q, categorias, tipo, lugar, startDate, endDate, page, size, sort
+                q, categorias, tipo, lugar, startDate, endDate, null, page, size, sort
         ));
     }
 
@@ -128,5 +128,15 @@ public class ReportController {
         return ResponseEntity.ok(MessageResponse.builder()
                 .mensaje("Reporte eliminado correctamente.")
                 .build());
+    }
+
+    /**
+     * HU-28: PUT /api/reports/{id}/cerrar
+     */
+    @PutMapping("/{id}/cerrar")
+    public ResponseEntity<ReportResponse> cerrarReporteManual(
+            @AuthenticationPrincipal Usuario usuario,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(reportService.cerrarReporteManual(usuario, id));
     }
 }

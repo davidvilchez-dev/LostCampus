@@ -31,6 +31,7 @@ public class ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
     private final com.david.backend.event.WebSocketSubscriptionListener subscriptionListener;
+    private final ReportService reportService;
 
     @Transactional
     public ChatRoom createChatRoom(Reporte reporte, Usuario creador, Usuario reclamante) {
@@ -152,8 +153,7 @@ public class ChatService {
 
         // Update Reporte status to RECUPERADO
         Reporte reporte = room.getReporte();
-        reporte.setEstado("RECUPERADO");
-        reporteRepository.save(reporte);
+        reportService.actualizarEstado(reporte, "RECUPERADO");
 
         // Update ChatRoom to inactive
         room.setActivo(false);

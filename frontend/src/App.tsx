@@ -15,6 +15,8 @@ import EditReportPage from './pages/EditReportPage';
 import MatchesPage from './pages/MatchesPage';
 import ClaimsPage from './pages/ClaimsPage';
 import MessagesPage from './pages/MessagesPage';
+import AdminRoute from './components/AdminRoute';
+import AdminPanelPage from './pages/AdminPanelPage';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -38,6 +40,11 @@ function App() {
           <Route path="/solicitudes" element={<ClaimsPage />} />
           <Route path="/mensajes" element={<MessagesPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
+
+          {/* Rutas de Administrador */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminPanelPage />} />
+          </Route>
         </Route>
       </Routes>
       <ToastContainer

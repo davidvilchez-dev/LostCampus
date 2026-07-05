@@ -42,6 +42,9 @@ public class SolicitudReclamacionServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private ReportService reportService;
+
     @InjectMocks
     private SolicitudReclamacionService claimService;
 
@@ -86,6 +89,13 @@ public class SolicitudReclamacionServiceTest {
         request = new CreateClaimRequest();
         request.setReporteId(10L);
         request.setMensajePrueba("Tiene mi carnet universitario adentro.");
+
+        lenient().doAnswer(invocation -> {
+            Reporte r = invocation.getArgument(0);
+            String status = invocation.getArgument(1);
+            r.setEstado(status);
+            return null;
+        }).when(reportService).actualizarEstado(any(Reporte.class), anyString());
     }
 
     @Test
@@ -114,6 +124,7 @@ public class SolicitudReclamacionServiceTest {
         assertEquals(EstadoReclamacion.ACEPTADA, response.getEstado());
         assertEquals("EN_PROCESO", reporte.getEstado());
         verify(claimRepository).save(any(SolicitudReclamacion.class));
+        verify(reportService).actualizarEstado(reporte, "EN_PROCESO");
         verify(chatService).createChatRoom(eq(reporte), eq(reporte.getUsuario()), eq(reclamante));
     }
 
@@ -237,7 +248,7 @@ public class SolicitudReclamacionServiceTest {
 
         verify(claimRepository).save(claim);
         verify(claimRepository).save(otraClaim);
-        verify(reportRepository).save(reporte);
+        verify(reportService).actualizarEstado(reporte, "EN_PROCESO");
         verify(chatService).createChatRoom(reporte, autor, reclamante);
     }
 

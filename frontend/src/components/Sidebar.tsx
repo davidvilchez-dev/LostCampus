@@ -18,7 +18,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onCloseMobile }: SidebarProps) {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -33,7 +33,7 @@ export default function Sidebar({ onCloseMobile }: SidebarProps) {
     { to: '/coincidencias', label: 'Coincidencias', icon: <GitMerge className="w-5 h-5" /> },
     { to: '/solicitudes', label: 'Solicitudes', icon: <FileText className="w-5 h-5" /> },
     { to: '/mensajes', label: 'Mensajes', icon: <MessageSquare className="w-5 h-5" /> },
-    { to: '/admin', label: 'Panel de Administración', icon: <Shield className="w-5 h-5" /> },
+    ...(user?.es_admin ? [{ to: '/admin', label: 'Panel de Administración', icon: <Shield className="w-5 h-5" /> }] : []),
   ];
 
   return (

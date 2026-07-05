@@ -24,6 +24,7 @@ public class SolicitudReclamacionService {
     private final ReporteRepository reportRepository;
     private final ChatService chatService;
     private final NotificationService notificationService;
+    private final ReportService reportService;
 
     @Transactional
     public ClaimResponse enviarSolicitud(Usuario reclamante, CreateClaimRequest request) {
@@ -65,8 +66,7 @@ public class SolicitudReclamacionService {
         SolicitudReclamacion savedClaim = claimRepository.save(claim);
 
         // Cambiar el estado del reporte asociado a EN_PROCESO
-        reporte.setEstado("EN_PROCESO");
-        reportRepository.save(reporte);
+        reportService.actualizarEstado(reporte, "EN_PROCESO");
 
         // Crear la sala de chat privada automáticamente
         chatService.createChatRoom(reporte, reporte.getUsuario(), reclamante);
@@ -120,8 +120,7 @@ public class SolicitudReclamacionService {
 
         // Cambiar el estado del reporte asociado a EN_PROCESO
         Reporte reporte = claim.getReporte();
-        reporte.setEstado("EN_PROCESO");
-        reportRepository.save(reporte);
+        reportService.actualizarEstado(reporte, "EN_PROCESO");
 
         // Crear la sala de chat privada automáticamente
         chatService.createChatRoom(reporte, creadorReporte, claim.getReclamante());

@@ -42,10 +42,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             var usuario = usuarioRepository.findByCorreo(email);
 
             if (usuario.isPresent() && SecurityContextHolder.getContext().getAuthentication() == null) {
+                java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = usuario.get().getEsAdmin()
+                        ? Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))
+                        : Collections.emptyList();
                 var authToken = new UsernamePasswordAuthenticationToken(
                         usuario.get(),
                         null,
-                        Collections.emptyList()
+                        authorities
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

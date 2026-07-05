@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2, MessageSquare, Sparkles } from 'lucide-react';
-import { getReportById, deleteReport, getSuggestedMatches, type Reporte, type MatchResponse } from '../api/reportService';
+import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2, MessageSquare, Sparkles, XCircle } from 'lucide-react';
+import { getReportById, deleteReport, getSuggestedMatches, closeReport, type Reporte, type MatchResponse } from '../api/reportService';
+import ConfirmModal from '../components/ConfirmModal';
 import { createClaim, getSentClaims } from '../api/claimService';
 import { toast } from 'react-toastify';
 import useAuthStore from '../store/authStore';
@@ -22,6 +23,10 @@ export default function ReportDetailPage() {
   const [isSubmittingClaim, setIsSubmittingClaim] = useState(false);
   const [hasClaimed, setHasClaimed] = useState(false);
   const [claimStatus, setClaimStatus] = useState('');
+
+  // Cierre manual (HU-28)
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     async function loadReport() {
@@ -115,6 +120,22 @@ export default function ReportDetailPage() {
       toast.error('No se pudo eliminar el reporte.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleCloseReport = async () => {
+    if (!report) return;
+    setIsClosing(true);
+    try {
+      await closeReport(report.id);
+      toast.success('¡Publicación cerrada exitosamente!');
+      setIsCloseModalOpen(false);
+      const rep = await getReportById(report.id);
+      setReport(rep);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'No se pudo cerrar la publicación.');
+    } finally {
+      setIsClosing(false);
     }
   };
 
@@ -264,15 +285,24 @@ export default function ReportDetailPage() {
               </div>
 
               {/* Acciones de Propietario */}
-              {isOwner && report.estado === 'ACTIVO' && (
+              {isOwner && (report.estado === 'ACTIVO' || report.estado === 'EN_PROCESO') && (
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={handleEdit}
-                    title="Editar reporte"
-                    className="p-2 bg-brand-border-dark/50 hover:bg-brand-border-light text-brand-muted hover:text-brand-text rounded-xl border border-brand-border-dark/60 transition-all cursor-pointer shadow-md hover:scale-105"
+                    onClick={() => setIsCloseModalOpen(true)}
+                    title="Cerrar publicación"
+                    className="p-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 hover:border-amber-500/30 transition-all cursor-pointer shadow-md hover:scale-105"
                   >
-                    <Edit2 className="w-4 h-4" />
+                    <XCircle className="w-4 h-4" />
                   </button>
+                  {report.estado === 'ACTIVO' && (
+                    <button
+                      onClick={handleEdit}
+                      title="Editar reporte"
+                      className="p-2 bg-brand-border-dark/50 hover:bg-brand-border-light text-brand-muted hover:text-brand-text rounded-xl border border-brand-border-dark/60 transition-all cursor-pointer shadow-md hover:scale-105"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={handleDelete}
                     title="Eliminar reporte"
@@ -468,6 +498,17 @@ export default function ReportDetailPage() {
 
       {/* El modal de reclamación fue removido para iniciar chat directo */}
 
+      <ConfirmModal
+        isOpen={isCloseModalOpen}
+        onClose={() => setIsCloseModalOpen(false)}
+        onConfirm={handleCloseReport}
+        title="¿Cerrar publicación?"
+        message="¿Estás seguro de que deseas cerrar manualmente este reporte? Esto cancelará todas las solicitudes pendientes y la publicación dejará de ser visible en el feed principal."
+        confirmText="Cerrar Reporte"
+        cancelText="Cancelar"
+        type="warning"
+        isSubmitting={isClosing}
+      />
     </div>
   );
 }

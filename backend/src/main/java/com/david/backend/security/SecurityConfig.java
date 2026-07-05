@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/reports/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categorias").permitAll()
                 .requestMatchers("/ws-chat/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

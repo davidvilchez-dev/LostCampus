@@ -51,6 +51,9 @@ public class ChatServiceTest {
     @Mock
     private com.david.backend.event.WebSocketSubscriptionListener subscriptionListener;
 
+    @Mock
+    private ReportService reportService;
+
     @InjectMocks
     private ChatService chatService;
 
@@ -100,6 +103,13 @@ public class ChatServiceTest {
                 .activo(true)
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        lenient().doAnswer(invocation -> {
+            Reporte r = invocation.getArgument(0);
+            String status = invocation.getArgument(1);
+            r.setEstado(status);
+            return null;
+        }).when(reportService).actualizarEstado(any(Reporte.class), anyString());
     }
 
     @Test
@@ -216,7 +226,7 @@ public class ChatServiceTest {
         assertNotNull(result);
         assertFalse(result.getActivo());
         assertEquals("RECUPERADO", result.getReporteEstado());
-        verify(reporteRepository, times(1)).save(reporte);
+        verify(reportService, times(1)).actualizarEstado(reporte, "RECUPERADO");
         verify(chatRoomRepository, times(1)).save(room);
         verify(messagingTemplate, times(1)).convertAndSend(eq("/topic/chat/100/close"), any(ChatRoomResponse.class));
     }
