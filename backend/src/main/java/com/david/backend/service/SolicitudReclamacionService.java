@@ -59,18 +59,25 @@ public class SolicitudReclamacionService {
                 .reporte(reporte)
                 .reclamante(reclamante)
                 .mensajePrueba(request.getMensajePrueba())
-                .estado(EstadoReclamacion.PENDIENTE)
+                .estado(EstadoReclamacion.ACEPTADA)
                 .build();
 
         SolicitudReclamacion savedClaim = claimRepository.save(claim);
 
+        // Cambiar el estado del reporte asociado a EN_PROCESO
+        reporte.setEstado("EN_PROCESO");
+        reportRepository.save(reporte);
+
+        // Crear la sala de chat privada automáticamente
+        chatService.createChatRoom(reporte, reporte.getUsuario(), reclamante);
+
         // Notificar al dueño de la publicación
         notificationService.crearNotificacion(
                 reporte.getUsuario(),
-                "Nueva solicitud de reclamación",
-                reclamante.getNombreCompleto() + " ha enviado un reclamo para tu reporte '" + reporte.getNombreObjeto() + "'.",
+                "Nuevo reclamo de objeto",
+                reclamante.getNombreCompleto() + " ha iniciado una conversación para reclamar tu reporte '" + reporte.getNombreObjeto() + "'.",
                 "RECLAMO_RECIBIDO",
-                "/solicitudes"
+                "/mensajes"
         );
 
         return ClaimResponse.fromEntity(savedClaim);

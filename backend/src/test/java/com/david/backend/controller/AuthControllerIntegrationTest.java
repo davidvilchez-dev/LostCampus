@@ -42,6 +42,15 @@ public class AuthControllerIntegrationTest {
         private com.david.backend.repository.ImagenReporteRepository imagenReporteRepository;
 
         @Autowired
+        private com.david.backend.repository.ChatRoomRepository chatRoomRepository;
+
+        @Autowired
+        private com.david.backend.repository.ChatMessageRepository chatMessageRepository;
+
+        @Autowired
+        private com.david.backend.repository.NotificacionRepository notificacionRepository;
+
+        @Autowired
         private PasswordEncoder passwordEncoder;
 
         @BeforeEach
@@ -49,9 +58,12 @@ public class AuthControllerIntegrationTest {
                 mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                                 .apply(SecurityMockMvcConfigurers.springSecurity())
                                 .build();
+                chatMessageRepository.deleteAllInBatch();
+                chatRoomRepository.deleteAllInBatch();
                 solicitudReclamacionRepository.deleteAllInBatch();
                 imagenReporteRepository.deleteAllInBatch();
                 reporteRepository.deleteAllInBatch();
+                notificacionRepository.deleteAllInBatch();
                 usuarioRepository.deleteAllInBatch();
         }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2, Sparkles, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Tag, ChevronLeft, ChevronRight, ImageOff, User, Edit2, Trash2, Loader2, MessageSquare, Sparkles } from 'lucide-react';
 import { getReportById, deleteReport, getSuggestedMatches, type Reporte, type MatchResponse } from '../api/reportService';
 import { createClaim, getSentClaims } from '../api/claimService';
 import { toast } from 'react-toastify';
@@ -19,8 +19,6 @@ export default function ReportDetailPage() {
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
 
   // Estados de reclamación (HU-19, HU-21)
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-  const [claimMessage, setClaimMessage] = useState('');
   const [isSubmittingClaim, setIsSubmittingClaim] = useState(false);
   const [hasClaimed, setHasClaimed] = useState(false);
   const [claimStatus, setClaimStatus] = useState('');
@@ -120,16 +118,20 @@ export default function ReportDetailPage() {
     }
   };
 
-  const handleSubmitClaim = async () => {
-    if (!report || claimMessage.trim().length < 10) return;
+  const handleStartChatAndClaim = async () => {
+    if (!report) return;
     setIsSubmittingClaim(true);
     try {
-      await createClaim(report.id, claimMessage);
+      // Registrar reclamo automático y crear canal de chat en backend
+      await createClaim(report.id, "Conversación de reclamo iniciada.");
       setHasClaimed(true);
-      setClaimStatus('PENDIENTE');
-      setIsClaimModalOpen(false);
+      setClaimStatus('ACEPTADA');
+      toast.success('¡Conversación de reclamo iniciada! Redirigiendo al chat...');
+      setTimeout(() => {
+        navigate('/mensajes');
+      }, 1000);
     } catch (err: any) {
-      toast.error(err.response?.data?.error || 'No se pudo enviar la solicitud de reclamación.');
+      toast.error(err.response?.data?.error || 'No se pudo iniciar la conversación de reclamo.');
     } finally {
       setIsSubmittingClaim(false);
     }
@@ -358,15 +360,25 @@ export default function ReportDetailPage() {
               {hasClaimed ? (
                 <div className="w-full bg-[#101726]/50 border border-brand-border-dark text-amber-400 font-bold py-3 px-4 rounded-xl text-xs text-center flex items-center justify-center gap-2">
                   <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
-                  Reclamado ({claimStatus === 'PENDIENTE' ? 'Pendiente de revisión' : claimStatus})
+                  Reclamado ({claimStatus === 'ACEPTADA' ? 'Chat iniciado' : 'Chat iniciado'})
                 </div>
               ) : (
                 <button
-                  onClick={() => setIsClaimModalOpen(true)}
-                  className="w-full bg-brand-accent hover:bg-brand-accent-hover text-brand-text font-bold py-3 px-4 rounded-xl text-xs transition-all hover:scale-[1.02] cursor-pointer shadow-lg shadow-brand-accent/10 flex items-center justify-center gap-2"
+                  onClick={handleStartChatAndClaim}
+                  disabled={isSubmittingClaim}
+                  className="w-full bg-brand-accent hover:bg-brand-accent-hover text-brand-text font-bold py-3 px-4 rounded-xl text-xs transition-all hover:scale-[1.02] cursor-pointer shadow-lg shadow-brand-accent/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  <FileText className="w-4.5 h-4.5" />
-                  Reclamar Propiedad
+                  {isSubmittingClaim ? (
+                    <>
+                      <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                      Iniciando chat...
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="w-4.5 h-4.5" />
+                      Reclamar e Iniciar Chat
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -454,72 +466,7 @@ export default function ReportDetailPage() {
         </div>
       )}
 
-      {/* Modal para enviar reclamación (HU-19, HU-21) */}
-      {isClaimModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity duration-300"
-            onClick={() => !isSubmittingClaim && setIsClaimModalOpen(false)}
-          ></div>
-
-          <div className="relative w-full max-w-lg bg-[#0d1322] border border-brand-border-dark/85 rounded-3xl shadow-2xl p-6 md:p-8 z-10 animate-slide-in-left space-y-6">
-            <div className="space-y-1">
-              <h3 className="text-lg font-black text-brand-text flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-brand-accent" />
-                Reclamar propiedad del objeto
-              </h3>
-              <p className="text-xxs text-brand-muted text-left">
-                Por favor, describe detalladamente características específicas del objeto (ej. marcas particulares, pegatinas, llaveros, contenido interno, número de serie) para demostrar al hallador que te pertenece.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-1.5 text-left">
-                <label className="text-xxs font-black text-brand-muted uppercase tracking-wider">
-                  Mensaje de evidencia (mínimo 10 caracteres)
-                </label>
-                <textarea
-                  value={claimMessage}
-                  onChange={(e) => setClaimMessage(e.target.value)}
-                  rows={4}
-                  placeholder="Ej: La mochila tiene una mancha de pintura azul en la base y adentro lleva mi cuaderno de cálculo con mi nombre escrito..."
-                  className="w-full bg-[#101726]/40 border border-brand-border-dark hover:border-brand-accent/35 focus:border-brand-accent focus:outline-none p-3.5 rounded-xl text-xs text-brand-text placeholder-brand-muted/50 leading-relaxed resize-none transition-colors"
-                />
-                <div className="flex justify-between items-center text-xxs text-brand-muted">
-                  <span>Mínimo 10 caracteres</span>
-                  <span className={claimMessage.trim().length >= 10 ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                    {claimMessage.trim().length} caracteres
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                onClick={() => setIsClaimModalOpen(false)}
-                disabled={isSubmittingClaim}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-brand-text text-xs font-bold rounded-xl border border-slate-700/80 transition-all cursor-pointer disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSubmitClaim}
-                disabled={isSubmittingClaim || claimMessage.trim().length < 10}
-                className="px-5 py-2 bg-brand-accent hover:bg-brand-accent-hover text-brand-text text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-1.5"
-              >
-                {isSubmittingClaim ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <span>Enviar Solicitud</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* El modal de reclamación fue removido para iniciar chat directo */}
 
     </div>
   );

@@ -98,11 +98,12 @@ public class SolicitudReclamacionServiceTest {
                 .reporte(reporte)
                 .reclamante(reclamante)
                 .mensajePrueba(request.getMensajePrueba())
-                .estado(EstadoReclamacion.PENDIENTE)
+                .estado(EstadoReclamacion.ACEPTADA)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         when(claimRepository.save(any(SolicitudReclamacion.class))).thenReturn(savedClaim);
+        when(chatService.createChatRoom(any(), any(), any())).thenReturn(null);
 
         ClaimResponse response = claimService.enviarSolicitud(reclamante, request);
 
@@ -110,8 +111,10 @@ public class SolicitudReclamacionServiceTest {
         assertEquals(100L, response.getId());
         assertEquals("Juan Reclamante", response.getReclamanteNombre());
         assertEquals("Pedro Encontrador", response.getReporteAutorNombre());
-        assertEquals(EstadoReclamacion.PENDIENTE, response.getEstado());
+        assertEquals(EstadoReclamacion.ACEPTADA, response.getEstado());
+        assertEquals("EN_PROCESO", reporte.getEstado());
         verify(claimRepository).save(any(SolicitudReclamacion.class));
+        verify(chatService).createChatRoom(eq(reporte), eq(reporte.getUsuario()), eq(reclamante));
     }
 
     @Test

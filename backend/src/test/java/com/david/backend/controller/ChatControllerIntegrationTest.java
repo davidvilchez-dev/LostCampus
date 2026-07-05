@@ -55,6 +55,9 @@ public class ChatControllerIntegrationTest {
     private ChatMessageRepository chatMessageRepository;
 
     @Autowired
+    private com.david.backend.repository.NotificacionRepository notificacionRepository;
+
+    @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
@@ -81,6 +84,7 @@ public class ChatControllerIntegrationTest {
         chatMessageRepository.deleteAllInBatch();
         chatRoomRepository.deleteAllInBatch();
         reporteRepository.deleteAllInBatch();
+        notificacionRepository.deleteAllInBatch();
         usuarioRepository.deleteAllInBatch();
         categoriaRepository.deleteAllInBatch();
 

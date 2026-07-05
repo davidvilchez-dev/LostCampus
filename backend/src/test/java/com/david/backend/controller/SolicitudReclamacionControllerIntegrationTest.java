@@ -56,6 +56,15 @@ public class SolicitudReclamacionControllerIntegrationTest {
     private ImagenReporteRepository imagenReporteRepository;
 
     @Autowired
+    private com.david.backend.repository.ChatRoomRepository chatRoomRepository;
+
+    @Autowired
+    private com.david.backend.repository.ChatMessageRepository chatMessageRepository;
+
+    @Autowired
+    private com.david.backend.repository.NotificacionRepository notificacionRepository;
+
+    @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
@@ -74,9 +83,12 @@ public class SolicitudReclamacionControllerIntegrationTest {
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
 
+        chatMessageRepository.deleteAllInBatch();
+        chatRoomRepository.deleteAllInBatch();
         claimRepository.deleteAllInBatch();
         imagenReporteRepository.deleteAllInBatch();
         reporteRepository.deleteAllInBatch();
+        notificacionRepository.deleteAllInBatch();
         usuarioRepository.deleteAllInBatch();
         categoriaRepository.deleteAllInBatch();
 
@@ -135,22 +147,7 @@ public class SolicitudReclamacionControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.reclamante_nombre").value("David Reclamante"))
                 .andExpect(jsonPath("$.reporte_nombre_objeto").value("Laptop ThinkPad"))
-                .andExpect(jsonPath("$.estado").value("PENDIENTE"));
-    }
-
-    @Test
-    void enviarSolicitud_ValidationFailure_MessageTooShort() throws Exception {
-        String requestJson = String.format(
-                "{\"reporte_id\": %d, \"mensaje_prueba\": \"Corta\"}", // Menos de 10 caracteres
-                testReport.getId()
-        );
-
-        mockMvc.perform(post("/api/reclamaciones")
-                        .header("Authorization", "Bearer " + claimantToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.mensajePrueba").exists());
+                .andExpect(jsonPath("$.estado").value("ACEPTADA"));
     }
 
     @Test

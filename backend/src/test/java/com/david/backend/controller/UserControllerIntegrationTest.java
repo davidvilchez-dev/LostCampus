@@ -42,6 +42,15 @@ public class UserControllerIntegrationTest {
         private com.david.backend.repository.SolicitudReclamacionRepository solicitudReclamacionRepository;
 
         @Autowired
+        private com.david.backend.repository.ChatRoomRepository chatRoomRepository;
+
+        @Autowired
+        private com.david.backend.repository.ChatMessageRepository chatMessageRepository;
+
+        @Autowired
+        private com.david.backend.repository.NotificacionRepository notificacionRepository;
+
+        @Autowired
         private JwtTokenProvider jwtTokenProvider;
 
         @Autowired
@@ -55,9 +64,12 @@ public class UserControllerIntegrationTest {
                 mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                                 .apply(SecurityMockMvcConfigurers.springSecurity())
                                 .build();
+                chatMessageRepository.deleteAllInBatch();
+                chatRoomRepository.deleteAllInBatch();
                 solicitudReclamacionRepository.deleteAllInBatch();
                 imagenReporteRepository.deleteAllInBatch();
                 reporteRepository.deleteAllInBatch();
+                notificacionRepository.deleteAllInBatch();
                 usuarioRepository.deleteAllInBatch();
 
                 testUser = Usuario.builder()
