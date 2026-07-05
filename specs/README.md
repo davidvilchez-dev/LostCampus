@@ -9,8 +9,8 @@ Este es el tablero central de control para el desarrollo ágil de la plataforma 
 | Sprint | Enfoque Principal | Historias | Esfuerzo Total | Estado |
 | :--- | :--- | :--- | :--- | :--- |
 | **Sprint 1** | **Base del MVP y Reportes Core** | HU-01 a HU-10 | 42 Puntos | **Completado** |
-| **Sprint 2** | **Gestión Avanzada de Reportes, Coincidencias y Solicitudes** | HU-11 a HU-21 | 53 Puntos | **En Desarrollo** |
-| **Sprint 3** | **Panel Administrativo y Pulido Final** | HU-22 a HU-30 | ~30 Puntos (Est.) | *Pendiente* |
+| **Sprint 2** | **Gestión Avanzada de Reportes, Coincidencias y Solicitudes** | HU-11 a HU-21 | 53 Puntos | **Completado** |
+| **Sprint 3** | **Notificaciones, Chat y Panel Administrativo** | HU-22 a HU-30 | 38 Puntos | **En Desarrollo** |
 
 ---
 
@@ -54,3 +54,24 @@ Este es el tablero central de control para el desarrollo ágil de la plataforma 
 | **HU-19** | Enviar solicitud de reclamación | Solicitudes | Alta | 5 | `specs/012-claim-requests/` | 🟢 Completado |
 | **HU-20** | Gestionar solicitudes de reclamación recibidas | Solicitudes | Alta | 5 | `specs/012-claim-requests/` | 🟢 Completado |
 | **HU-21** | Proveer información adicional de propiedad | Solicitudes | Media | 3 | `specs/012-claim-requests/` | 🟢 Completado |
+
+---
+
+## 🏃‍♂️ Sprint 3: Notificaciones, Chat y Panel Administrativo
+
+**Objetivo del Sprint**: Implementar el chat privado en tiempo real, la confirmación de entregas con transición de estados, notificaciones en tiempo real (WebSocket/campana) y el panel administrativo completo (moderación de reportes, categorías y estadísticas).
+
+### Tablero de Tareas (Sprint 3)
+
+| ID | Historia de Usuario | Módulo | Prioridad | Esfuerzo (SP) | Carpeta Spec-Kit | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **HU-22** | Apertura automática de chat privado al aceptar reclamación | Chat y Estados | Alta | 5 | `specs/013-chat-and-states/` | 🟢 Completado |
+| **HU-23** | Enviar y recibir mensajes en tiempo real | Chat y Estados | Alta | 5 | `specs/013-chat-and-states/` | 🟢 Completado |
+| **HU-24** | Persistencia del historial de chat | Chat y Estados | Alta | 3 | `specs/013-chat-and-states/` | 🟢 Completado |
+| **HU-25** | Confirmación de entrega del objeto | Chat y Estados | Alta | 3 | `specs/013-chat-and-states/` | 🟢 Completado |
+| **HU-26** | Sistema de notificaciones en tiempo real y campana | Notificaciones | Alta | 8 | `specs/014-notifications/` | 🟡 En Desarrollo |
+| **HU-27** | Transición automática de estados (`EN_PROCESO`/`RECUPERADO`) | Chat y Estados | Alta | 3 | `specs/013-chat-and-states/` | 🟢 Completado |
+| **HU-28** | Panel administrativo: Moderación de reportes | Administración | Media | 5 | `specs/015-admin-panel/` | 🔴 Pendiente |
+| **HU-29** | Panel administrativo: Gestión de categorías | Administración | Media | 3 | `specs/015-admin-panel/` | 🔴 Pendiente |
+| **HU-30** | Panel administrativo: Dashboard de estadísticas | Administración | Baja | 3 | `specs/015-admin-panel/` | 🔴 Pendiente |
+
