@@ -280,4 +280,76 @@ public class ChatServiceTest {
 
         assertThrows(RuntimeException.class, () -> chatService.confirmDelivery(userA, 100L));
     }
+
+    @Test
+    void sendMessage_ClaimantActive_NoNotification() {
+        SendChatMessageRequest request = new SendChatMessageRequest("Hola reclamante");
+        // Sender is creator (userA)
+        when(chatRoomRepository.findById(100L)).thenReturn(Optional.of(room));
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionListener.isUserActiveInChat(2L, 100L)).thenReturn(true); // Claimant (userB: ID 2) is active
+
+        ChatMessageResponse result = chatService.sendMessage(userA, 100L, request);
+
+        assertNotNull(result);
+        assertEquals("Hola reclamante", result.getContenido());
+        verify(notificationService, never()).crearNotificacion(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void sendMessage_ClaimantInactive_SendsNotification() {
+        SendChatMessageRequest request = new SendChatMessageRequest("Hola reclamante desconectado");
+        // Sender is creator (userA)
+        when(chatRoomRepository.findById(100L)).thenReturn(Optional.of(room));
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionListener.isUserActiveInChat(2L, 100L)).thenReturn(false); // Claimant (userB: ID 2) is inactive
+
+        ChatMessageResponse result = chatService.sendMessage(userA, 100L, request);
+
+        assertNotNull(result);
+        assertEquals("Hola reclamante desconectado", result.getContenido());
+        verify(notificationService, times(1)).crearNotificacion(
+                eq(userB),
+                eq("Nuevo mensaje de chat"),
+                eq("Usuario A: Hola reclamante desconectado"),
+                eq("CHAT_MENSAJE"),
+                eq("/mensajes")
+        );
+    }
+
+    @Test
+    void sendMessage_CreatorActive_NoNotification() {
+        SendChatMessageRequest request = new SendChatMessageRequest("Hola creador");
+        // Sender is claimant (userB)
+        when(chatRoomRepository.findById(100L)).thenReturn(Optional.of(room));
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionListener.isUserActiveInChat(1L, 100L)).thenReturn(true); // Creator (userA: ID 1) is active
+
+        ChatMessageResponse result = chatService.sendMessage(userB, 100L, request);
+
+        assertNotNull(result);
+        assertEquals("Hola creador", result.getContenido());
+        verify(notificationService, never()).crearNotificacion(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void sendMessage_CreatorInactive_SendsNotification() {
+        SendChatMessageRequest request = new SendChatMessageRequest("Hola creador desconectado");
+        // Sender is claimant (userB)
+        when(chatRoomRepository.findById(100L)).thenReturn(Optional.of(room));
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionListener.isUserActiveInChat(1L, 100L)).thenReturn(false); // Creator (userA: ID 1) is inactive
+
+        ChatMessageResponse result = chatService.sendMessage(userB, 100L, request);
+
+        assertNotNull(result);
+        assertEquals("Hola creador desconectado", result.getContenido());
+        verify(notificationService, times(1)).crearNotificacion(
+                eq(userA),
+                eq("Nuevo mensaje de chat"),
+                eq("Usuario B: Hola creador desconectado"),
+                eq("CHAT_MENSAJE"),
+                eq("/mensajes")
+        );
+    }
 }

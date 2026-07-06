@@ -40,4 +40,18 @@ public class ChatWebSocketControllerTest {
 
         verify(chatService, times(1)).sendMessage(user, 1L, request);
     }
+
+    @Test
+    void sendMessage_WhenChatServiceThrowsException_PropagatesException() {
+        Usuario user = Usuario.builder().id(10L).nombreCompleto("David").build();
+        UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(user, null);
+        SendChatMessageRequest request = new SendChatMessageRequest("Hola");
+
+        doThrow(new RuntimeException("Closed chat")).when(chatService).sendMessage(user, 1L, request);
+
+        assertThrows(RuntimeException.class,
+                () -> chatWebSocketController.sendMessage(1L, request, principal));
+
+        verify(chatService, times(1)).sendMessage(user, 1L, request);
+    }
 }

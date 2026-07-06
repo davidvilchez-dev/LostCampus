@@ -65,4 +65,77 @@ public class WebSocketSubscriptionListenerTest {
 
         assertFalse(listener.isUserActiveInChat(50L, 100L));
     }
+
+    @Test
+    void testSubscribeDestinationNull() {
+        Usuario user = Usuario.builder().id(50L).nombreCompleto("David Test").build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null);
+
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("simpDestination", null);
+        headers.put("simpUser", auth);
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], new MessageHeaders(headers));
+
+        SessionSubscribeEvent subscribeEvent = new SessionSubscribeEvent(this, message, auth);
+        listener.handleSessionSubscribe(subscribeEvent);
+
+        assertFalse(listener.isUserActiveInChat(50L, 100L));
+    }
+
+    @Test
+    void testSubscribeNonChatDestination() {
+        Usuario user = Usuario.builder().id(50L).nombreCompleto("David Test").build();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null);
+
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("simpDestination", "/topic/notifications/1");
+        headers.put("simpUser", auth);
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], new MessageHeaders(headers));
+
+        SessionSubscribeEvent subscribeEvent = new SessionSubscribeEvent(this, message, auth);
+        listener.handleSessionSubscribe(subscribeEvent);
+
+        assertFalse(listener.isUserActiveInChat(50L, 100L));
+    }
+
+    @Test
+    void testSubscribePrincipalNotAuthenticated() {
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("simpDestination", "/topic/chat/100");
+        headers.put("simpUser", null);
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], new MessageHeaders(headers));
+
+        SessionSubscribeEvent subscribeEvent = new SessionSubscribeEvent(this, message, null);
+        listener.handleSessionSubscribe(subscribeEvent);
+
+        assertFalse(listener.isUserActiveInChat(50L, 100L));
+    }
+
+    @Test
+    void testSubscribePrincipalNotUsuario() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("NotAUserObject", null);
+
+        Map<String, Object> headers = new HashMap<>();
+        headers.put("simpDestination", "/topic/chat/100");
+        headers.put("simpUser", auth);
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], new MessageHeaders(headers));
+
+        SessionSubscribeEvent subscribeEvent = new SessionSubscribeEvent(this, message, auth);
+        listener.handleSessionSubscribe(subscribeEvent);
+
+        assertFalse(listener.isUserActiveInChat(50L, 100L));
+    }
+
+    @Test
+    void testUnsubscribeOrDisconnectNullPrincipal() {
+        Map<String, Object> headers = new HashMap<>();
+        Message<byte[]> message = MessageBuilder.createMessage(new byte[0], new MessageHeaders(headers));
+
+        SessionUnsubscribeEvent unsubscribeEvent = new SessionUnsubscribeEvent(this, message, null);
+        assertDoesNotThrow(() -> listener.handleSessionUnsubscribe(unsubscribeEvent));
+
+        SessionDisconnectEvent disconnectEvent = new SessionDisconnectEvent(this, message, "session-id", null, null);
+        assertDoesNotThrow(() -> listener.handleSessionDisconnect(disconnectEvent));
+    }
 }
+
