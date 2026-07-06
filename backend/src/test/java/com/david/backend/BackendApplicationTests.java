@@ -10,4 +10,9 @@ class BackendApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void mainMethodTest() {
+		BackendApplication.main(new String[]{"--spring.main.web-application-type=none"});
+	}
+
 }

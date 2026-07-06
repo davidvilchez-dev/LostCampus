@@ -22,12 +22,12 @@ public class SimilarityUtils {
 
         // Convertir a minúsculas y normalizar caracteres
         String normalized = text.toLowerCase()
-                .replaceAll("[áàäâ]", "a")
-                .replaceAll("[éèëê]", "e")
-                .replaceAll("[íìïî]", "i")
-                .replaceAll("[óòöô]", "o")
-                .replaceAll("[úùüû]", "u")
-                .replaceAll("[^a-z0-9ñ ]", " "); // Remover caracteres especiales excepto ñ y números
+                .replaceAll("[\u00e1\u00e0\u00e4\u00e2]", "a")
+                .replaceAll("[\u00e9\u00e8\u00eb\u00ea]", "e")
+                .replaceAll("[\u00ed\u00ec\u00ef\u00ee]", "i")
+                .replaceAll("[\u00f3\u00f2\u00f6\u00f4]", "o")
+                .replaceAll("[\u00fa\u00f9\u00fc\u00fb]", "u")
+                .replaceAll("[^a-z0-9\u00f1 ]", " "); // Remover caracteres especiales excepto ñ y números
 
         String[] words = normalized.split("\\s+");
         Set<String> tokens = new HashSet<>();

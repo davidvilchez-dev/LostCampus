@@ -287,4 +287,68 @@ public class SolicitudReclamacionServiceTest {
         assertEquals(EstadoReclamacion.RECHAZADA, response.getEstado());
         verify(claimRepository).save(claim);
     }
+
+    @Test
+    void aceptarSolicitud_NotFound_ThrowsResourceNotFoundException() {
+        when(claimRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () ->
+                claimService.aceptarSolicitud(autor, 999L)
+        );
+    }
+
+    @Test
+    void aceptarSolicitud_NotPending_ThrowsRuntimeException() {
+        SolicitudReclamacion claim = SolicitudReclamacion.builder()
+                .id(100L)
+                .reporte(reporte)
+                .reclamante(reclamante)
+                .estado(EstadoReclamacion.ACEPTADA) // Ya está aceptada
+                .build();
+
+        when(claimRepository.findById(100L)).thenReturn(Optional.of(claim));
+
+        assertThrows(RuntimeException.class, () ->
+                claimService.aceptarSolicitud(autor, 100L)
+        );
+    }
+
+    @Test
+    void rechazarSolicitud_NotFound_ThrowsResourceNotFoundException() {
+        when(claimRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () ->
+                claimService.rechazarSolicitud(autor, 999L)
+        );
+    }
+
+    @Test
+    void rechazarSolicitud_NotAuthor_ThrowsRuntimeException() {
+        SolicitudReclamacion claim = SolicitudReclamacion.builder()
+                .id(100L)
+                .reporte(reporte)
+                .reclamante(reclamante)
+                .estado(EstadoReclamacion.PENDIENTE)
+                .build();
+
+        when(claimRepository.findById(100L)).thenReturn(Optional.of(claim));
+
+        assertThrows(RuntimeException.class, () ->
+                claimService.rechazarSolicitud(reclamante, 100L) // Reclamante intenta rechazar
+        );
+    }
+
+    @Test
+    void rechazarSolicitud_NotPending_ThrowsRuntimeException() {
+        SolicitudReclamacion claim = SolicitudReclamacion.builder()
+                .id(100L)
+                .reporte(reporte)
+                .reclamante(reclamante)
+                .estado(EstadoReclamacion.RECHAZADA) // Ya está rechazada
+                .build();
+
+        when(claimRepository.findById(100L)).thenReturn(Optional.of(claim));
+
+        assertThrows(RuntimeException.class, () ->
+                claimService.rechazarSolicitud(autor, 100L)
+        );
+    }
 }

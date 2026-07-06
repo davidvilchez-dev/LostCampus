@@ -166,4 +166,43 @@ public class AdminServiceTest {
                 verify(chatRoomRepository).deleteAllInBatch(List.of(room));
                 verify(reporteRepository).delete(testReport);
         }
+
+        @Test
+        void cambiarEstadoReporte_NotFound_ThrowsException() {
+                when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+                assertThrows(com.david.backend.exception.ResourceNotFoundException.class, () ->
+                                adminService.cambiarEstadoReporte(adminUser, 999L, "CERRADO"));
+        }
+
+        @Test
+        void eliminarReporte_NotFound_ThrowsException() {
+                when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+                assertThrows(com.david.backend.exception.ResourceNotFoundException.class, () ->
+                                adminService.eliminarReporte(adminUser, 999L, "Motivo"));
+        }
+
+        @Test
+        void eliminarReporte_CloudinaryDeleteThrowsIOException() throws java.io.IOException {
+                ImagenReporte img = ImagenReporte.builder()
+                                .id(1L)
+                                .publicIdCloudinary("img_pub_id")
+                                .urlCloudinary("url")
+                                .build();
+                testReport.getImagenes().add(img);
+
+                when(reporteRepository.findById(10L)).thenReturn(Optional.of(testReport));
+                when(chatRoomRepository.findByReporteId(10L)).thenReturn(new ArrayList<>());
+                when(claimRepository.findByReporteIdAndEstado(eq(10L), any(EstadoReclamacion.class)))
+                                .thenReturn(new ArrayList<>());
+                when(historialEstadoReporteRepository.findByReporteIdOrderByFechaCambioDesc(10L))
+                                .thenReturn(new ArrayList<>());
+
+                doThrow(new java.io.IOException("Cloudinary error")).when(cloudinaryService).deleteImage("img_pub_id");
+
+                assertDoesNotThrow(() -> adminService.eliminarReporte(adminUser, 10L, "Motivo"));
+
+                verify(reporteRepository).delete(testReport);
+        }
 }

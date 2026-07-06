@@ -635,4 +635,30 @@ public class ReportServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
     }
+
+    @Test
+    void createReport_CategoryNotFound_ThrowsException() {
+        CreateReportRequest request = new CreateReportRequest();
+        request.setCategoriaId(999L);
+        request.setTipo("PERDIDO");
+
+        when(categoriaRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> reportService.createReport(testUser, request));
+    }
+
+    @Test
+    void uploadImages_NotFound_ThrowsException() {
+        MockMultipartFile file = new MockMultipartFile("files", "pic.jpg", "image/jpeg", "content".getBytes());
+        when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> reportService.uploadImages(testUser, 999L, List.of(file)));
+    }
+
+    @Test
+    void deleteReport_NotFound_ThrowsException() {
+        when(reporteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> reportService.deleteReport(testUser, 999L));
+    }
 }

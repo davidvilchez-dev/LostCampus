@@ -149,4 +149,50 @@ public class AuthServiceTest {
         assertNull(testUser.getTokenExpiracion());
         verify(usuarioRepository).save(testUser);
     }
+
+    @Test
+    void login_UserNotFound_ThrowsException() {
+        LoginRequest request = new LoginRequest();
+        request.setCorreo("nonexistent@unsch.edu.pe");
+        request.setContrasena("any_password");
+
+        when(usuarioRepository.findByCorreo(request.getCorreo())).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void forgotPassword_UserNotFound_ThrowsException() {
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setCorreo("nonexistent@unsch.edu.pe");
+
+        when(usuarioRepository.findByCorreo(request.getCorreo())).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> authService.forgotPassword(request));
+    }
+
+    @Test
+    void resetPassword_TokenNotFound_ThrowsException() {
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setToken("invalid_token");
+        request.setNuevaContrasena("new_password");
+
+        when(usuarioRepository.findByTokenRecuperacion(request.getToken())).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> authService.resetPassword(request));
+    }
+
+    @Test
+    void resetPassword_TokenExpired_ThrowsException() {
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setToken("expired_token");
+        request.setNuevaContrasena("new_password");
+
+        testUser.setTokenRecuperacion("expired_token");
+        testUser.setTokenExpiracion(LocalDateTime.now().minusMinutes(5)); // Expired 5 mins ago
+
+        when(usuarioRepository.findByTokenRecuperacion(request.getToken())).thenReturn(Optional.of(testUser));
+
+        assertThrows(RuntimeException.class, () -> authService.resetPassword(request));
+    }
 }

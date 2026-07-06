@@ -143,6 +143,22 @@ public class AdminControllerIntegrationTest {
     }
 
     @Test
+    void getReports_Admin_WithFiltersAndStatus_Success() throws Exception {
+        mockMvc.perform(get("/api/admin/reportes?estado=ACTIVO")
+                .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].nombre_objeto").value("Celular Samsung"));
+    }
+
+    @Test
+    void getReports_Admin_WithStatusAll_Success() throws Exception {
+        mockMvc.perform(get("/api/admin/reportes?estado=ALL")
+                .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].nombre_objeto").value("Celular Samsung"));
+    }
+
+    @Test
     void getReports_RegularUser_ReturnsForbidden() throws Exception {
         mockMvc.perform(get("/api/admin/reportes")
                 .header("Authorization", "Bearer " + userToken))

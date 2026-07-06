@@ -129,4 +129,31 @@ public class NotificationServiceTest {
 
         verify(notificacionRepository).markAllAsReadByUsuarioId(1L);
     }
+
+    @Test
+    void crearNotificacion_WebSocketException_ContinuesSuccessfully() {
+        when(notificacionRepository.save(any(Notificacion.class))).thenReturn(testNotification);
+        doThrow(new RuntimeException("WebSocket down")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationResponse.class));
+
+        NotificationResponse response = assertDoesNotThrow(() -> notificationService.crearNotificacion(
+                testUser,
+                "Test Titulo",
+                "Test Mensaje",
+                "TEST",
+                "/test"
+        ));
+
+        assertNotNull(response);
+        assertEquals(100L, response.getId());
+        verify(notificacionRepository).save(any(Notificacion.class));
+    }
+
+    @Test
+    void markAsRead_NotFound_ThrowsException() {
+        when(notificacionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () ->
+                notificationService.markAsRead(testUser, 999L)
+        );
+    }
 }

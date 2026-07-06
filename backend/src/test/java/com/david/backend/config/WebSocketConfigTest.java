@@ -135,4 +135,76 @@ class WebSocketConfigTest {
         assertNotNull(resultAccessor);
         assertNull(resultAccessor.getUser());
     }
+
+    @Test
+    void configureClientInboundChannel_NonConnectCommand_ShouldDoNothing() {
+        ArgumentCaptor<org.springframework.messaging.support.ChannelInterceptor> captor = ArgumentCaptor
+                .forClass(org.springframework.messaging.support.ChannelInterceptor.class);
+        when(channelRegistration.interceptors(any())).thenReturn(channelRegistration);
+
+        webSocketConfig.configureClientInboundChannel(channelRegistration);
+        verify(channelRegistration).interceptors(captor.capture());
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
+        accessor.setLeaveMutable(true);
+        var message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+
+        var result = captor.getValue().preSend(message, messageChannel);
+
+        assertNotNull(result);
+        StompHeaderAccessor resultAccessor = MessageHeaderAccessor.getAccessor(result, StompHeaderAccessor.class);
+        assertNotNull(resultAccessor);
+        assertNull(resultAccessor.getUser());
+    }
+
+    @Test
+    void configureClientInboundChannel_MissingOrInvalidAuthorizationHeader_ShouldLeaveUserNull() {
+        ArgumentCaptor<org.springframework.messaging.support.ChannelInterceptor> captor = ArgumentCaptor
+                .forClass(org.springframework.messaging.support.ChannelInterceptor.class);
+        when(channelRegistration.interceptors(any())).thenReturn(channelRegistration);
+
+        webSocketConfig.configureClientInboundChannel(channelRegistration);
+        verify(channelRegistration).interceptors(captor.capture());
+
+        // Case A: Missing Authorization Header
+        StompHeaderAccessor accessorNoAuth = StompHeaderAccessor.create(StompCommand.CONNECT);
+        accessorNoAuth.setLeaveMutable(true);
+        var messageNoAuth = MessageBuilder.createMessage(new byte[0], accessorNoAuth.getMessageHeaders());
+        var resultNoAuth = captor.getValue().preSend(messageNoAuth, messageChannel);
+        assertNull(MessageHeaderAccessor.getAccessor(resultNoAuth, StompHeaderAccessor.class).getUser());
+
+        // Case B: Authorization Header doesn't start with Bearer
+        StompHeaderAccessor accessorBasic = StompHeaderAccessor.create(StompCommand.CONNECT);
+        accessorBasic.setNativeHeader("Authorization", "Basic some-creds");
+        accessorBasic.setLeaveMutable(true);
+        var messageBasic = MessageBuilder.createMessage(new byte[0], accessorBasic.getMessageHeaders());
+        var resultBasic = captor.getValue().preSend(messageBasic, messageChannel);
+        assertNull(MessageHeaderAccessor.getAccessor(resultBasic, StompHeaderAccessor.class).getUser());
+    }
+
+    @Test
+    void configureClientInboundChannel_UserNotFound_ShouldLeaveUserNull() {
+        ArgumentCaptor<org.springframework.messaging.support.ChannelInterceptor> captor = ArgumentCaptor
+                .forClass(org.springframework.messaging.support.ChannelInterceptor.class);
+        when(channelRegistration.interceptors(any())).thenReturn(channelRegistration);
+
+        webSocketConfig.configureClientInboundChannel(channelRegistration);
+        verify(channelRegistration).interceptors(captor.capture());
+
+        when(jwtTokenProvider.isTokenValid("valid-token")).thenReturn(true);
+        when(jwtTokenProvider.extractEmail("valid-token")).thenReturn("unknown@unsch.edu.pe");
+        when(usuarioRepository.findByCorreo("unknown@unsch.edu.pe")).thenReturn(Optional.empty());
+
+        StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+        accessor.setNativeHeader("Authorization", "Bearer valid-token");
+        accessor.setLeaveMutable(true);
+        var message = MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
+
+        var result = captor.getValue().preSend(message, messageChannel);
+
+        assertNotNull(result);
+        StompHeaderAccessor resultAccessor = MessageHeaderAccessor.getAccessor(result, StompHeaderAccessor.class);
+        assertNotNull(resultAccessor);
+        assertNull(resultAccessor.getUser());
+    }
 }

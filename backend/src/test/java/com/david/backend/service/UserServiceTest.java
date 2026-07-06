@@ -114,4 +114,17 @@ public class UserServiceTest {
         );
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
+
+    @Test
+    void updateProfile_WithNullValues_DoesNotModifyUser() {
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setNombreCompleto(null);
+        request.setFotoUrl(null);
+
+        UserResponse response = userService.updateProfile(testUser, request);
+
+        assertNotNull(response);
+        assertEquals("David Perez", response.getNombreCompleto());
+        assertEquals("http://example.com/avatar.jpg", response.getFotoUrl());
+    }
 }

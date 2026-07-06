@@ -195,6 +195,25 @@ public class ReportControllerIntegrationTest {
         }
 
         @Test
+        void getReportsFeed_WithSearchQuery_Success() throws Exception {
+                Reporte report = Reporte.builder()
+                                .usuario(testUser)
+                                .categoria(testCategory)
+                                .tipo("ENCONTRADO")
+                                .nombreObjeto("Mochila negra")
+                                .descripcion("Marca Adidas")
+                                .lugar("Comedor Universitario")
+                                .fechaIncidente(LocalDate.now())
+                                .build();
+                reporteRepository.save(report);
+
+                mockMvc.perform(get("/api/reports?q=Adidas"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.content", hasSize(1)))
+                                .andExpect(jsonPath("$.content[0].nombre_objeto").value("Mochila negra"));
+        }
+
+        @Test
         void getReportById_Success() throws Exception {
                 Reporte report = Reporte.builder()
                                 .usuario(testUser)

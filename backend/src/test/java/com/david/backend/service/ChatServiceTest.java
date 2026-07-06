@@ -237,4 +237,47 @@ public class ChatServiceTest {
 
         assertThrows(RuntimeException.class, () -> chatService.confirmDelivery(userB, 100L));
     }
+
+    @Test
+    void getRoomsForUser_NoMessagesAndWithImages_Success() {
+        com.david.backend.model.ImagenReporte img = com.david.backend.model.ImagenReporte.builder()
+                .id(1L)
+                .urlCloudinary("http://image.url")
+                .build();
+        reporte.getImagenes().add(img);
+
+        when(chatRoomRepository.findByCreadorReporteIdOrReclamanteIdOrderByCreatedAtDesc(1L, 1L))
+                .thenReturn(Collections.singletonList(room));
+        when(chatMessageRepository.findFirstByChatRoomIdOrderByCreatedAtDesc(100L))
+                .thenReturn(Optional.empty());
+
+        List<ChatRoomResponse> result = chatService.getRoomsForUser(userA);
+
+        assertFalse(result.isEmpty());
+        assertEquals("http://image.url", result.get(0).getReporteImagenUrl());
+        assertNull(result.get(0).getUltimoMensaje());
+    }
+
+    @Test
+    void sendMessage_AsClaimantAndUserActive_Success() {
+        SendChatMessageRequest request = new SendChatMessageRequest("Hola de vuelta");
+        // Sender is claimant (userB)
+        when(chatRoomRepository.findById(100L)).thenReturn(Optional.of(room));
+        when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionListener.isUserActiveInChat(1L, 100L)).thenReturn(true); // Owner is active
+
+        ChatMessageResponse result = chatService.sendMessage(userB, 100L, request);
+
+        assertNotNull(result);
+        assertEquals("Hola de vuelta", result.getContenido());
+        verify(notificationService, never()).crearNotificacion(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void confirmDelivery_AlreadyInactive_ThrowsException() {
+        room.setActivo(false);
+        when(chatRoomRepository.findById(100L)).thenReturn(Optional.of(room));
+
+        assertThrows(RuntimeException.class, () -> chatService.confirmDelivery(userA, 100L));
+    }
 }

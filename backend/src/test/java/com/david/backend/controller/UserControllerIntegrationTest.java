@@ -132,6 +132,20 @@ public class UserControllerIntegrationTest {
         }
 
         @Test
+        void changePassword_MissingFields_ReturnsBadRequest() throws Exception {
+                String json = "{"
+                                + "\"contrasenaActual\":\"securePassword123\""
+                                + "}";
+
+                mockMvc.perform(put("/api/users/me/password")
+                                .header("Authorization", "Bearer " + jwtToken)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error").value("Se requieren la contraseña actual y la nueva."));
+        }
+
+        @Test
         void uploadAvatar_Success() throws Exception {
                 java.util.Map<String, Object> mockResponse = new java.util.HashMap<>();
                 mockResponse.put("secure_url", "http://mock.url/avatar.png");
