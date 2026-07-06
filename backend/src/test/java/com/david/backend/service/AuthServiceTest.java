@@ -1,9 +1,6 @@
 package com.david.backend.service;
 
-import com.david.backend.dto.request.ForgotPasswordRequest;
-import com.david.backend.dto.request.LoginRequest;
-import com.david.backend.dto.request.RegisterRequest;
-import com.david.backend.dto.request.ResetPasswordRequest;
+import com.david.backend.dto.request.*;
 import com.david.backend.dto.response.AuthResponse;
 import com.david.backend.dto.response.MessageResponse;
 import com.david.backend.model.Usuario;
@@ -36,6 +33,9 @@ public class AuthServiceTest {
     @Mock
     private JwtTokenProvider jwtTokenProvider;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -48,6 +48,7 @@ public class AuthServiceTest {
                 .nombreCompleto("David Perez")
                 .correo("david@unsch.edu.pe")
                 .contrasenaHash("encoded_password")
+                .cuentaVerificada(true)
                 .build();
     }
 
@@ -60,15 +61,66 @@ public class AuthServiceTest {
 
         when(usuarioRepository.existsByCorreo(request.getCorreo())).thenReturn(false);
         when(passwordEncoder.encode(request.getContrasena())).thenReturn("encoded_password");
-        when(jwtTokenProvider.generateToken(request.getCorreo())).thenReturn("mocked_token");
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(testUser);
 
-        AuthResponse response = authService.register(request);
+        MessageResponse response = authService.register(request);
+
+        assertNotNull(response);
+        assertTrue(response.getMensaje().contains("david@unsch.edu.pe"));
+        verify(usuarioRepository).save(any(Usuario.class));
+        verify(emailService).enviarCodigoVerificacion(eq("david@unsch.edu.pe"), anyString());
+    }
+
+    @Test
+    void verificarCuenta_Success() {
+        VerifyAccountRequest request = new VerifyAccountRequest();
+        request.setCorreo("david@unsch.edu.pe");
+        request.setCodigo("123456");
+
+        testUser.setCuentaVerificada(false);
+        testUser.setCodigoVerificacion("123456");
+        testUser.setCodigoExpiracion(LocalDateTime.now().plusMinutes(5));
+
+        when(usuarioRepository.findByCorreo("david@unsch.edu.pe")).thenReturn(Optional.of(testUser));
+        when(jwtTokenProvider.generateToken("david@unsch.edu.pe")).thenReturn("mocked_token");
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(testUser);
+
+        AuthResponse response = authService.verificarCuenta(request);
 
         assertNotNull(response);
         assertEquals("mocked_token", response.getToken());
-        assertEquals("David Perez", response.getUsuario().getNombreCompleto());
-        verify(usuarioRepository).save(any(Usuario.class));
+        assertTrue(testUser.getCuentaVerificada());
+        assertNull(testUser.getCodigoVerificacion());
+    }
+
+    @Test
+    void verificarCuenta_WrongCode_ThrowsException() {
+        VerifyAccountRequest request = new VerifyAccountRequest();
+        request.setCorreo("david@unsch.edu.pe");
+        request.setCodigo("654321");
+
+        testUser.setCuentaVerificada(false);
+        testUser.setCodigoVerificacion("123456");
+
+        when(usuarioRepository.findByCorreo("david@unsch.edu.pe")).thenReturn(Optional.of(testUser));
+
+        assertThrows(RuntimeException.class, () -> authService.verificarCuenta(request));
+    }
+
+    @Test
+    void reenviarCodigo_Success() {
+        ResendCodeRequest request = new ResendCodeRequest();
+        request.setCorreo("david@unsch.edu.pe");
+
+        testUser.setCuentaVerificada(false);
+
+        when(usuarioRepository.findByCorreo("david@unsch.edu.pe")).thenReturn(Optional.of(testUser));
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(testUser);
+
+        MessageResponse response = authService.reenviarCodigo(request);
+
+        assertNotNull(response);
+        verify(emailService).enviarCodigoVerificacion(eq("david@unsch.edu.pe"), anyString());
     }
 
     @Test
@@ -88,6 +140,7 @@ public class AuthServiceTest {
         request.setCorreo("david@unsch.edu.pe");
         request.setContrasena("admin123");
 
+        testUser.setCuentaVerificada(true);
         when(usuarioRepository.findByCorreo(request.getCorreo())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(request.getContrasena(), testUser.getContrasenaHash())).thenReturn(true);
         when(jwtTokenProvider.generateToken(request.getCorreo())).thenReturn("mocked_token");

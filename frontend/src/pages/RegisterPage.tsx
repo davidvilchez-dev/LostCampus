@@ -59,8 +59,8 @@ export default function RegisterPage() {
     });
 
     if (success) {
-      toast.success('Cuenta creada');
-      navigate('/login');
+      toast.info('Código de verificación enviado al correo.');
+      navigate(`/verificar?correo=${encodeURIComponent(correo.trim().toLowerCase())}`);
     } else {
       toast.error('Error al registrar');
     }
@@ -104,7 +104,7 @@ export default function RegisterPage() {
             label="Correo electrónico"
             icon={<Mail className="w-4.5 h-4.5" />}
             type="email"
-            placeholder="ejemplo@unsch.edu.pe"
+            placeholder="correo@ejemplo.com"
             value={correo}
             onChange={setCorreo}
             error={errors.correo}

@@ -20,6 +20,7 @@ public class NotificationService {
 
     private final NotificacionRepository notificacionRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final EmailService emailService;
 
     /**
      * Crear una notificación, persistirla, y enviarla por WebSocket + Email simulado.
@@ -46,8 +47,8 @@ public class NotificationService {
             log.error("Error al enviar notificación por WebSocket", e);
         }
 
-        // 2. Simular envío de Correo Institucional por Consola
-        simularEnvioEmail(destinatario.getCorreo(), titulo, mensaje);
+        // 2. Enviar correo real
+        emailService.enviarNotificacion(destinatario.getCorreo(), titulo, mensaje);
 
         return response;
     }
@@ -95,14 +96,4 @@ public class NotificationService {
         notificacionRepository.markAllAsReadByUsuarioId(usuario.getId());
     }
 
-    /**
-     * Método auxiliar para simular el envío de un correo electrónico.
-     */
-    private void simularEnvioEmail(String destinatario, String titulo, String mensaje) {
-        System.out.println("\n===== NOTIFICACIÓN POR CORREO INSTITUCIONAL =====");
-        System.out.println("Para: " + destinatario);
-        System.out.println("Asunto: " + titulo);
-        System.out.println("Mensaje: " + mensaje);
-        System.out.println("==================================================\n");
-    }
 }

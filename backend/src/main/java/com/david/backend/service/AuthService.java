@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -21,23 +22,65 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final EmailService emailService;
 
     /**
-     * HU-01: Registro de usuario
+     * HU-01: Registro de usuario (ahora envía código de verificación)
      */
-    public AuthResponse register(RegisterRequest request) {
+    public MessageResponse register(RegisterRequest request) {
         // Validar que el correo sea único
         if (usuarioRepository.existsByCorreo(request.getCorreo())) {
             throw new RuntimeException("El correo ya está registrado.");
         }
 
-        // Crear el usuario
+        // Generar código de verificación de 6 dígitos
+        String codigo = generarCodigo6Digitos();
+
+        // Crear el usuario con cuenta NO verificada
         Usuario usuario = Usuario.builder()
                 .nombreCompleto(request.getNombreCompleto())
                 .correo(request.getCorreo())
                 .contrasenaHash(passwordEncoder.encode(request.getContrasena()))
+                .cuentaVerificada(false)
+                .codigoVerificacion(codigo)
+                .codigoExpiracion(LocalDateTime.now().plusMinutes(15))
                 .build();
 
+        usuarioRepository.save(usuario);
+
+        // Enviar código por correo real
+        emailService.enviarCodigoVerificacion(usuario.getCorreo(), codigo);
+
+        return MessageResponse.builder()
+                .mensaje("Se ha enviado un código de verificación a " + request.getCorreo() + ".")
+                .build();
+    }
+
+    /**
+     * Verificar cuenta con código de 6 dígitos
+     */
+    public AuthResponse verificarCuenta(VerifyAccountRequest request) {
+        Usuario usuario = usuarioRepository.findByCorreo(request.getCorreo())
+                .orElseThrow(() -> new RuntimeException("No se encontró una cuenta con ese correo."));
+
+        if (Boolean.TRUE.equals(usuario.getCuentaVerificada())) {
+            throw new RuntimeException("La cuenta ya está verificada.");
+        }
+
+        if (usuario.getCodigoVerificacion() == null ||
+                !usuario.getCodigoVerificacion().equals(request.getCodigo())) {
+            throw new RuntimeException("El código de verificación es incorrecto.");
+        }
+
+        if (usuario.getCodigoExpiracion() == null ||
+                usuario.getCodigoExpiracion().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("El código de verificación ha expirado. Solicita uno nuevo.");
+        }
+
+        // Marcar como verificada y limpiar código
+        usuario.setCuentaVerificada(true);
+        usuario.setCodigoVerificacion(null);
+        usuario.setCodigoExpiracion(null);
         usuarioRepository.save(usuario);
 
         // Generar JWT y retornar
@@ -49,7 +92,30 @@ public class AuthService {
     }
 
     /**
-     * HU-02: Inicio de sesión
+     * Reenviar código de verificación
+     */
+    public MessageResponse reenviarCodigo(ResendCodeRequest request) {
+        Usuario usuario = usuarioRepository.findByCorreo(request.getCorreo())
+                .orElseThrow(() -> new RuntimeException("No se encontró una cuenta con ese correo."));
+
+        if (Boolean.TRUE.equals(usuario.getCuentaVerificada())) {
+            throw new RuntimeException("La cuenta ya está verificada.");
+        }
+
+        String codigo = generarCodigo6Digitos();
+        usuario.setCodigoVerificacion(codigo);
+        usuario.setCodigoExpiracion(LocalDateTime.now().plusMinutes(15));
+        usuarioRepository.save(usuario);
+
+        emailService.enviarCodigoVerificacion(usuario.getCorreo(), codigo);
+
+        return MessageResponse.builder()
+                .mensaje("Se ha reenviado el código de verificación a " + request.getCorreo() + ".")
+                .build();
+    }
+
+    /**
+     * HU-02: Inicio de sesión (verifica que la cuenta esté verificada)
      */
     public AuthResponse login(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByCorreo(request.getCorreo())
@@ -57,6 +123,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getContrasena(), usuario.getContrasenaHash())) {
             throw new RuntimeException("Credenciales incorrectas.");
+        }
+
+        if (!Boolean.TRUE.equals(usuario.getCuentaVerificada())) {
+            throw new RuntimeException("CUENTA_NO_VERIFICADA");
         }
 
         String token = jwtTokenProvider.generateToken(usuario.getCorreo());
@@ -67,7 +137,7 @@ public class AuthService {
     }
 
     /**
-     * HU-05: Solicitar recuperación de contraseña
+     * HU-05: Solicitar recuperación de contraseña (ahora envía correo real)
      */
     public MessageResponse forgotPassword(ForgotPasswordRequest request) {
         Usuario usuario = usuarioRepository.findByCorreo(request.getCorreo())
@@ -79,13 +149,8 @@ public class AuthService {
         usuario.setTokenExpiracion(LocalDateTime.now().plusMinutes(15));
         usuarioRepository.save(usuario);
 
-        // En producción aquí se enviaría un correo real con el token.
-        // Por ahora se registra en consola para desarrollo.
-        System.out.println("===== TOKEN DE RECUPERACION =====");
-        System.out.println("Correo: " + usuario.getCorreo());
-        System.out.println("Token: " + token);
-        System.out.println("Expira: " + usuario.getTokenExpiracion());
-        System.out.println("=================================");
+        // Enviar correo real con enlace de recuperación
+        emailService.enviarRecuperacionContrasena(usuario.getCorreo(), token);
 
         return MessageResponse.builder()
                 .mensaje("Se han enviado las instrucciones de recuperación al correo " + request.getCorreo() + ".")
@@ -112,5 +177,14 @@ public class AuthService {
         return MessageResponse.builder()
                 .mensaje("La contraseña se ha restablecido correctamente.")
                 .build();
+    }
+
+    /**
+     * Genera un código aleatorio de 6 dígitos.
+     */
+    private String generarCodigo6Digitos() {
+        SecureRandom random = new SecureRandom();
+        int code = 100000 + random.nextInt(900000);
+        return String.valueOf(code);
     }
 }

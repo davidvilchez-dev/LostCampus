@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import {
   loginUser,
   registerUser,
+  verifyAccount,
   type LoginRequest,
   type RegisterRequest,
   type AuthResponse,
@@ -30,6 +31,8 @@ interface AuthState {
 interface AuthActions {
   /** Registra un nuevo usuario y redirige al login */
   register: (data: RegisterRequest) => Promise<boolean>;
+  /** Verifica cuenta e inicia sesión */
+  verify: (correo: string, codigo: string) => Promise<boolean>;
   /** Inicia sesión y almacena el token + usuario */
   login: (data: LoginRequest) => Promise<boolean>;
   /** Cierra sesión y limpia el estado */
@@ -79,6 +82,31 @@ const useAuthStore = create<AuthStore>((set) => ({
     } catch (err: any) {
       const message =
         err.response?.data?.error || err.message || 'Error al registrar. Intenta de nuevo.';
+      set({ isLoading: false, error: message });
+      return false;
+    }
+  },
+
+  verify: async (correo: string, codigo: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+    try {
+      const response: AuthResponse = await verifyAccount({ correo, codigo });
+      
+      // Guardar en localStorage
+      localStorage.setItem('lostcampus_token', response.token);
+      localStorage.setItem('lostcampus_user', JSON.stringify(response.usuario));
+
+      set({
+        user: response.usuario,
+        token: response.token,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+      return true;
+    } catch (err: any) {
+      const message =
+        err.response?.data?.error || err.message || 'Código incorrecto o expirado.';
       set({ isLoading: false, error: message });
       return false;
     }

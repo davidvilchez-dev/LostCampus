@@ -42,6 +42,17 @@ public class Usuario {
     @Column(name = "token_expiracion")
     private LocalDateTime tokenExpiracion;
 
+    // Campos para verificación de cuenta
+    @Column(name = "cuenta_verificada")
+    @Builder.Default
+    private Boolean cuentaVerificada = false;
+
+    @Column(name = "codigo_verificacion", length = 6)
+    private String codigoVerificacion;
+
+    @Column(name = "codigo_expiracion")
+    private LocalDateTime codigoExpiracion;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

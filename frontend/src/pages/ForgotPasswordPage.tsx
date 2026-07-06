@@ -17,14 +17,14 @@ export default function ForgotPasswordPage() {
 
   const validateEmail = (email: string): boolean => {
     if (!email.trim()) {
-      setError('El correo institucional es obligatorio.');
+      setError('El correo electrónico es obligatorio.');
       return false;
     }
 
-    // Expresión regular para validar formato y dominio @unsch.edu.pe
-    const unschRegex = /^[a-zA-Z0-9._%+-]+@unsch\.edu\.pe$/;
-    if (!unschRegex.test(email.trim())) {
-      setError('Solo se admiten correos institucionales terminados en @unsch.edu.pe.');
+    // Expresión regular genérica para validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Ingresa un correo electrónico válido.');
       return false;
     }
 
@@ -73,16 +73,16 @@ export default function ForgotPasswordPage() {
                 Recuperar contraseña
               </h1>
               <p className="text-brand-muted text-xs mt-2 leading-relaxed">
-                Ingresa tu correo institucional registrado para recibir un enlace de recuperación.
+                Ingresa tu correo electrónico registrado para recibir un enlace de recuperación.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} noValidate className="flex flex-col space-y-5">
               <AuthInput
-                label="Correo institucional"
+                label="Correo electrónico"
                 icon={<Mail className="w-4.5 h-4.5" />}
                 type="email"
-                placeholder="usuario@unsch.edu.pe"
+                placeholder="correo@ejemplo.com"
                 value={correo}
                 onChange={(val) => {
                   setCorreo(val);

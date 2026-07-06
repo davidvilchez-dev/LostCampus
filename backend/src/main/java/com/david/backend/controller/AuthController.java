@@ -19,11 +19,30 @@ public class AuthController {
 
     /**
      * HU-01: POST /api/auth/register
+     * Ahora retorna MessageResponse (código enviado al correo)
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
+    public ResponseEntity<MessageResponse> register(@Valid @RequestBody RegisterRequest request) {
+        MessageResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * POST /api/auth/verify — Verificar cuenta con código de 6 dígitos
+     */
+    @PostMapping("/verify")
+    public ResponseEntity<AuthResponse> verifyAccount(@Valid @RequestBody VerifyAccountRequest request) {
+        AuthResponse response = authService.verificarCuenta(request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * POST /api/auth/resend-code — Reenviar código de verificación
+     */
+    @PostMapping("/resend-code")
+    public ResponseEntity<MessageResponse> resendCode(@Valid @RequestBody ResendCodeRequest request) {
+        MessageResponse response = authService.reenviarCodigo(request);
+        return ResponseEntity.ok(response);
     }
 
     /**

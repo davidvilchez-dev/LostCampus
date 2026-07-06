@@ -50,9 +50,15 @@ export default function LoginPage() {
     });
 
     if (success) {
-      navigate('/feed'); // Redirige al feed principal (se implementará en la siguiente spec)
+      navigate('/feed'); // Redirige al feed principal
     } else {
-      toast.error('Credenciales incorrectas');
+      const storeError = useAuthStore.getState().error;
+      if (storeError === 'CUENTA_NO_VERIFICADA') {
+        toast.info('Debes verificar tu cuenta primero. Te hemos enviado un código.');
+        navigate(`/verificar?correo=${encodeURIComponent(correo.trim().toLowerCase())}`);
+      } else {
+        toast.error(storeError || 'Credenciales incorrectas');
+      }
     }
   };
 

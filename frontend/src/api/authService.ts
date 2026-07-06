@@ -35,6 +35,15 @@ export interface ResetPasswordRequest {
   nueva_contrasena: string;
 }
 
+export interface VerifyAccountRequest {
+  correo: string;
+  codigo: string;
+}
+
+export interface ResendCodeRequest {
+  correo: string;
+}
+
 export interface MessageResponse {
   mensaje: string;
 }
@@ -47,8 +56,26 @@ export interface MessageResponse {
  * Registra un nuevo usuario.
  * POST /api/auth/register
  */
-export async function registerUser(data: RegisterRequest): Promise<AuthResponse> {
-  const response = await axiosClient.post<AuthResponse>('auth/register', data);
+export async function registerUser(data: RegisterRequest): Promise<MessageResponse> {
+  const response = await axiosClient.post<MessageResponse>('auth/register', data);
+  return response.data;
+}
+
+/**
+ * Verifica una cuenta con el código de 6 dígitos.
+ * POST /api/auth/verify
+ */
+export async function verifyAccount(data: VerifyAccountRequest): Promise<AuthResponse> {
+  const response = await axiosClient.post<AuthResponse>('auth/verify', data);
+  return response.data;
+}
+
+/**
+ * Reenvía el código de verificación.
+ * POST /api/auth/resend-code
+ */
+export async function resendCode(data: ResendCodeRequest): Promise<MessageResponse> {
+  const response = await axiosClient.post<MessageResponse>('auth/resend-code', data);
   return response.data;
 }
 

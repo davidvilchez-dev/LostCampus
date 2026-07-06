@@ -10,6 +10,7 @@ import MyReportsPage from './pages/MyReportsPage';
 import ProfilePage from './pages/ProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyAccountPage from './pages/VerifyAccountPage';
 import ReportDetailPage from './pages/ReportDetailPage';
 import EditReportPage from './pages/EditReportPage';
 import MatchesPage from './pages/MatchesPage';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/recuperar" element={<ForgotPasswordPage />} />
         <Route path="/restablecer" element={<ResetPasswordPage />} />
+        <Route path="/verificar" element={<VerifyAccountPage />} />
         
         {/* Rutas Protegidas del Dashboard */}
         <Route element={<DashboardLayout />}>

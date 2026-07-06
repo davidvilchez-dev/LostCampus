@@ -79,9 +79,7 @@ public class AuthControllerIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.token", notNullValue()))
-                                .andExpect(jsonPath("$.usuario.nombre_completo").value("Juan Lopez"))
-                                .andExpect(jsonPath("$.usuario.correo").value("juan.lopez@unsch.edu.pe"));
+                                .andExpect(jsonPath("$.mensaje", containsString("código de verificación")));
         }
 
         @Test
@@ -90,6 +88,7 @@ public class AuthControllerIntegrationTest {
                                 .nombreCompleto("Juan Lopez")
                                 .correo("juan.lopez@unsch.edu.pe")
                                 .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                                .cuentaVerificada(true)
                                 .build();
                 usuarioRepository.save(existingUser);
 
@@ -107,11 +106,36 @@ public class AuthControllerIntegrationTest {
         }
 
         @Test
+        void verifyAccount_Success() throws Exception {
+                Usuario user = Usuario.builder()
+                                .nombreCompleto("Juan Lopez")
+                                .correo("juan.verificar@unsch.edu.pe")
+                                .contrasenaHash(passwordEncoder.encode("securePassword123"))
+                                .cuentaVerificada(false)
+                                .codigoVerificacion("123456")
+                                .codigoExpiracion(java.time.LocalDateTime.now().plusMinutes(10))
+                                .build();
+                usuarioRepository.save(user);
+
+                String json = "{"
+                                + "\"correo\":\"juan.verificar@unsch.edu.pe\","
+                                + "\"codigo\":\"123456\""
+                                + "}";
+
+                mockMvc.perform(post("/api/auth/verify")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.token", notNullValue()));
+        }
+
+        @Test
         void login_Success() throws Exception {
                 Usuario user = Usuario.builder()
                                 .nombreCompleto("Maria Gomez")
                                 .correo("maria.gomez@unsch.edu.pe")
                                 .contrasenaHash(passwordEncoder.encode("password123"))
+                                .cuentaVerificada(true)
                                 .build();
                 usuarioRepository.save(user);
 
