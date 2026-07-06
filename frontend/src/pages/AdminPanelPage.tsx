@@ -454,7 +454,7 @@ export default function AdminPanelPage() {
 
       {/* Moderation Status Modal */}
       {statusModalOpen && selectedReport && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md bg-brand-bg-dark border border-brand-border-dark/50 rounded-3xl p-6 shadow-2xl animate-fade-in relative">
             <button
               onClick={() => setStatusModalOpen(false)}
@@ -506,7 +506,7 @@ export default function AdminPanelPage() {
 
       {/* Moderation Delete Modal */}
       {deleteModalOpen && selectedReport && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0  flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md bg-brand-bg-dark border border-brand-border-dark/50 rounded-3xl p-6 shadow-2xl animate-fade-in relative">
             <button
               onClick={() => setDeleteModalOpen(false)}

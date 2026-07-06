@@ -11,8 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import java.security.Principal;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -28,9 +26,8 @@ public class ChatWebSocketControllerTest {
     @Test
     void sendMessage_NullPrincipal_ThrowsException() {
         SendChatMessageRequest request = new SendChatMessageRequest("Hola");
-        assertThrows(AuthenticationCredentialsNotFoundException.class, () -> 
-            chatWebSocketController.sendMessage(1L, request, null)
-        );
+        assertThrows(AuthenticationCredentialsNotFoundException.class,
+                () -> chatWebSocketController.sendMessage(1L, request, null));
     }
 
     @Test

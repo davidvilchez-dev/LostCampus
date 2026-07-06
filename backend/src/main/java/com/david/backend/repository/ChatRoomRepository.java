@@ -2,7 +2,6 @@ package com.david.backend.repository;
 
 import com.david.backend.model.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 

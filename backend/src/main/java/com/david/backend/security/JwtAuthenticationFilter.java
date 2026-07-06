@@ -24,12 +24,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            SecurityContextHolder.clearContext();
             filterChain.doFilter(request, response);
             return;
         }
@@ -41,18 +42,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             var usuario = usuarioRepository.findByCorreo(email);
 
-            if (usuario.isPresent() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = usuario.get().getEsAdmin()
-                        ? Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))
-                        : Collections.emptyList();
+            if (usuario.isPresent()) {
+                java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities = usuario
+                        .get().getEsAdmin()
+                                ? Collections.singletonList(
+                                        new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                                "ROLE_ADMIN"))
+                                : Collections.emptyList();
                 var authToken = new UsernamePasswordAuthenticationToken(
                         usuario.get(),
                         null,
-                        authorities
-                );
+                        authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+        } else {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

@@ -74,7 +74,7 @@ export default function NotificationBell({
 
       {/* Menú Desplegable */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-brand-bg-dark border border-brand-border-dark/80 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-fade-in-up">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-brand-bg-dark border border-brand-border-dark/80 rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
           {/* Cabecera */}
           <div className="p-4 border-b border-brand-border-dark/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export default function NotificationBell({
                   }`}
                 >
                   {/* Indicador de no leído */}
-                  <div className="flex-shrink-0 mt-1">
+                  <div className="mt-1">
                     <div
                       className={`w-2.5 h-2.5 rounded-full ${
                         !notif.leido ? 'bg-brand-accent animate-pulse' : 'bg-transparent'
@@ -120,7 +120,7 @@ export default function NotificationBell({
                   </div>
 
                   {/* Cuerpo */}
-                  <div className="flex-grow min-w-0">
+                  <div className=" min-w-0">
                     <p className={`text-xs text-brand-text truncate ${!notif.leido ? 'font-bold' : ''}`}>
                       {notif.titulo}
                     </p>

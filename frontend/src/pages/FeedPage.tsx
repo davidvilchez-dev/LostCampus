@@ -195,7 +195,7 @@ export default function FeedPage() {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as 'asc' | 'desc')}
-                className="appearance-none bg-[#131c31] border border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent rounded-xl py-2.5 pl-4 pr-10 text-sm text-brand-text font-medium outline-none cursor-pointer transition-all min-w-[140px]"
+                className="appearance-none bg-[#131c31] border border-brand-border-dark hover:border-[#24355a] focus:border-brand-accent rounded-xl py-2.5 pl-4 pr-10 text-sm text-brand-text font-medium outline-none cursor-pointer transition-all "
               >
                 <option value="desc">Más reciente</option>
                 <option value="asc">Más antiguo</option>

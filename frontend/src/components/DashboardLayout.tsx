@@ -161,7 +161,7 @@ export default function DashboardLayout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         
         {/* TOPBAR */}
-        <header className="h-16 border-b border-brand-border-dark flex items-center justify-between px-6 bg-[#0b1326]/60 backdrop-blur-md z-10 shrink-0">
+        <header className="h-16 border-b border-brand-border-dark flex items-center justify-between px-6 backdrop-blur-md z-10 shrink-0">
           {/* Botón hamburguesa móvil */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
