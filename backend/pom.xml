@@ -132,7 +132,9 @@
 						</goals>
 						<configuration>
 							<excludes>
-								<exclude>com/david/backend/BackendApplication.class</exclude>
+								<exclude>com/david/backend/BackendApplication*</exclude>
+								<exclude>com/david/backend/config/*</exclude>
+								<exclude>com/david/backend/security/*</exclude>
 							</excludes>
 						</configuration>
 					</execution>
