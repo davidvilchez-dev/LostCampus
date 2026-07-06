@@ -33,8 +33,8 @@ public class EmailService {
                       <svg viewBox="0 0 66 58" width="54" height="47" style="display:inline-block;vertical-align:middle;margin-right:12px;" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                           <linearGradient id="emailLogoGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#60a5fa" />
-                            <stop offset="100%" stop-color="#2563eb" />
+                            <stop offset="0%%" stop-color="#60a5fa" />
+                            <stop offset="100%%" stop-color="#2563eb" />
                           </linearGradient>
                         </defs>
                         <path d="M3 2 L3 47 L28 47 L28 39 L12 39 L12 2 Z" fill="white" />
@@ -77,8 +77,8 @@ public class EmailService {
                       <svg viewBox="0 0 66 58" width="54" height="47" style="display:inline-block;vertical-align:middle;margin-right:12px;" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                           <linearGradient id="emailLogoGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#60a5fa" />
-                            <stop offset="100%" stop-color="#2563eb" />
+                            <stop offset="0%%" stop-color="#60a5fa" />
+                            <stop offset="100%%" stop-color="#2563eb" />
                           </linearGradient>
                         </defs>
                         <path d="M3 2 L3 47 L28 47 L28 39 L12 39 L12 2 Z" fill="white" />
@@ -118,8 +118,8 @@ public class EmailService {
                       <svg viewBox="0 0 66 58" width="40" height="35" style="display:inline-block;vertical-align:middle;margin-right:8px;" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                           <linearGradient id="emailLogoGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#60a5fa" />
-                            <stop offset="100%" stop-color="#2563eb" />
+                            <stop offset="0%%" stop-color="#60a5fa" />
+                            <stop offset="100%%" stop-color="#2563eb" />
                           </linearGradient>
                         </defs>
                         <path d="M3 2 L3 47 L28 47 L28 39 L12 39 L12 2 Z" fill="white" />
