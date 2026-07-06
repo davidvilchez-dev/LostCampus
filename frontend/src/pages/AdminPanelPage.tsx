@@ -139,9 +139,9 @@ export default function AdminPanelPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-bg-dark text-brand-text py-8 px-4 sm:px-6 lg:px-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between border-b border-brand-border-dark/30 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-brand-border-dark/30 pb-6">
         <div className="flex items-center space-x-3.5">
           <div className="p-3 bg-brand-accent/10 border border-brand-accent/20 rounded-2xl shadow-inner text-brand-accent">
             <Shield className="w-7 h-7" />
@@ -420,7 +420,7 @@ export default function AdminPanelPage() {
                 {logs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-4 bg-brand-bg-dark border border-brand-border-dark/30 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between hover:border-brand-accent/20 transition-all duration-200"
+                    className="p-4 bg-brand-card border border-brand-border-dark/60 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between hover:border-brand-accent/20 transition-all duration-200"
                   >
                     <div>
                       <div className="flex items-center space-x-2">

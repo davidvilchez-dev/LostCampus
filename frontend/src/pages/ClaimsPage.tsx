@@ -121,7 +121,7 @@ export default function ClaimsPage() {
       </div>
 
       {currentClaims.length === 0 ? (
-        <div className="bg-brand-bg-dark border border-brand-border-dark/65 rounded-3xl p-10 text-center space-y-4 shadow-xl">
+        <div className="bg-brand-card/45 border border-brand-border-dark/60 rounded-2xl p-10 text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 bg-brand-border-dark/30 rounded-full flex items-center justify-center mx-auto text-brand-muted/70">
             <Info className="w-8 h-8" />
           </div>
@@ -143,7 +143,7 @@ export default function ClaimsPage() {
             return (
               <div
                 key={claim.id}
-                className="bg-brand-bg-dark border border-brand-border-dark/65 rounded-3xl p-5 md:p-6 space-y-5 shadow-xl hover:border-brand-accent/20 transition-all duration-300"
+                className="bg-brand-card border border-brand-border-dark/60 rounded-2xl p-5 md:p-6 space-y-5 shadow-xl hover:border-brand-accent/20 transition-all duration-300"
               >
                 {/* Header de la tarjeta */}
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-brand-border-dark/60 pb-3.5">

@@ -420,7 +420,7 @@ export default function ReportDetailPage() {
 
       {/* Sección de Coincidencias Sugeridas (Solo visible para el propietario) */}
       {isOwner && (
-        <div className="bg-brand-bg-dark/80 border border-brand-border-dark/65 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-sm">
+        <div className="bg-brand-card/45 border border-brand-border-dark/60 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl backdrop-blur-sm">
           <div className="flex items-center space-x-3 border-b border-brand-border-dark/60 pb-4">
             <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
             <h2 className="text-lg md:text-xl font-bold text-brand-text">Coincidencias Sugeridas por IA</h2>

@@ -10,10 +10,9 @@ import { resendCode } from '../api/authService';
 export default function VerifyAccountPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { verify, isLoading, error, clearError } = useAuthStore();
+  const { verify, isLoading, clearError } = useAuthStore();
 
-  const emailParam = searchParams.get('correo') || '';
-  const [correo, setCorreo] = useState(emailParam);
+  const correo = searchParams.get('correo') || '';
   const [pin, setPin] = useState<string[]>(Array(6).fill(''));
   const [cooldown, setCooldown] = useState(0);
   const [isResending, setIsResending] = useState(false);
@@ -148,7 +147,7 @@ export default function VerifyAccountPage() {
               {pin.map((digit, index) => (
                 <input
                   key={index}
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el) => { inputRefs.current[index] = el; }}
                   type="text"
                   maxLength={1}
                   value={digit}

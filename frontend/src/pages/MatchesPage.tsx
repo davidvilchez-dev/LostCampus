@@ -108,7 +108,7 @@ export default function MatchesPage() {
 
       {!hasActiveReports ? (
         /* Caso: Sin reportes activos */
-        <div className="bg-brand-bg-dark border border-brand-border-dark/65 rounded-3xl p-8 text-center space-y-4 shadow-xl">
+        <div className="bg-brand-card/45 border border-brand-border-dark/60 rounded-2xl p-8 text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 bg-brand-border-dark/30 rounded-full flex items-center justify-center mx-auto text-brand-muted/70">
             <Folder className="w-8 h-8" />
           </div>
@@ -127,7 +127,7 @@ export default function MatchesPage() {
         </div>
       ) : matchingPairs.length === 0 ? (
         /* Caso: Con reportes activos pero sin coincidencias encontradas */
-        <div className="bg-brand-bg-dark border border-brand-border-dark/65 rounded-3xl p-8 text-center space-y-4 shadow-xl">
+        <div className="bg-brand-card/45 border border-brand-border-dark/60 rounded-2xl p-8 text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 bg-amber-500/5 text-amber-400/80 rounded-full flex items-center justify-center mx-auto border border-amber-500/10">
             <Info className="w-8 h-8 animate-bounce" />
           </div>
@@ -140,7 +140,7 @@ export default function MatchesPage() {
         </div>
       ) : (
         /* Caso: Listado de parejas de coincidencia */
-        <div className="space-y-8">
+        <div className="space-y-6 animate-fade-in">
           {matchingPairs.map((pair) => {
             const isHighSim = pair.matchScore >= 80;
             const isMedSim = pair.matchScore >= 50 && pair.matchScore < 80;
@@ -148,7 +148,7 @@ export default function MatchesPage() {
             return (
               <div 
                 key={pair.id} 
-                className="bg-brand-bg-dark border border-brand-border-dark/65 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden"
+                className="bg-brand-card border border-brand-border-dark/60 rounded-2xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden"
               >
                 
                 {/* Cabecera Comparativa */}
