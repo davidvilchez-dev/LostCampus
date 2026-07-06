@@ -62,7 +62,8 @@ export default function RegisterPage() {
       toast.info('Código de verificación enviado al correo.');
       navigate(`/verificar?correo=${encodeURIComponent(correo.trim().toLowerCase())}`);
     } else {
-      toast.error('Error al registrar');
+      const storeError = useAuthStore.getState().error;
+      toast.error(storeError || 'Error al registrar');
     }
   };
 
