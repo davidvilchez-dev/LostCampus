@@ -18,5 +18,6 @@ public class ChatMessageResponse {
     private String remitenteNombre;
     private String remitenteFotoUrl;
     private String contenido;
+    private String imagenUrl;
     private LocalDateTime createdAt;
 }

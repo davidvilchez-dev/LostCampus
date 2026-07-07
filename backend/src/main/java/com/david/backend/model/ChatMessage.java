@@ -26,6 +26,9 @@ public class ChatMessage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String contenido;
 
+    @Column(name = "imagen_url")
+    private String imagenUrl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getChats, getChatMessages, confirmDelivery, type ChatRoom, type ChatMessage } from '../api/chatService';
+import { getChats, getChatMessages, confirmDelivery, uploadChatImage, type ChatRoom, type ChatMessage } from '../api/chatService';
 import useAuthStore from '../store/authStore';
 import { Client } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
-import { Send, Paperclip, Search, AlertCircle, CheckCircle, MessageSquare } from 'lucide-react';
+import { Send, Paperclip, Search, AlertCircle, CheckCircle, MessageSquare, Loader2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function MessagesPage() {
@@ -17,9 +17,11 @@ export default function MessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const stompClientRef = useRef<Client | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // 1. Obtener listado de salas al cargar
   useEffect(() => {
@@ -141,6 +143,37 @@ export default function MessagesPage() {
     } catch (error) {
       console.error('Error publishing STOMP message:', error);
       toast.error('Error al enviar mensaje.');
+    }
+  };
+
+  // 4.5 Subir y enviar imagen
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeRoom) return;
+
+    // Reset input
+    e.target.value = '';
+
+    try {
+      setIsUploading(true);
+      const imageUrl = await uploadChatImage(file);
+
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        stompClientRef.current.publish({
+          destination: `/app/chat.sendMessage/${activeRoom.id}`,
+          body: JSON.stringify({
+            contenido: '',
+            imagen_url: imageUrl
+          }),
+        });
+      } else {
+        toast.error('No se pudo enviar la imagen: Sin conexión.');
+      }
+    } catch (error) {
+      console.error('Error uploading chat image:', error);
+      toast.error('No se pudo subir la imagen.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -374,13 +407,27 @@ export default function MessagesPage() {
 
                         <div className="max-w-[70%]">
                           <div
-                            className={`px-4.5 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                            className={`rounded-2xl text-sm leading-relaxed shadow-sm overflow-hidden ${
                               isOwn
                                 ? 'bg-brand-accent text-brand-text rounded-br-none'
                                 : 'bg-[#18243e] text-brand-text border border-brand-border-dark/30 rounded-bl-none'
-                            }`}
+                            } ${m.imagen_url ? 'p-1.5' : 'px-4.5 py-3'}`}
                           >
-                            <p className="whitespace-pre-wrap wrap-break-word">{m.contenido}</p>
+                            {m.imagen_url && (
+                              <div className="mb-1 max-w-full overflow-hidden rounded-xl bg-black/10">
+                                <img
+                                  src={m.imagen_url}
+                                  alt="Imagen de chat"
+                                  className="max-h-72 w-full object-cover hover:scale-[1.02] transition-transform duration-200 cursor-pointer"
+                                  onClick={() => window.open(m.imagen_url!, '_blank')}
+                                />
+                              </div>
+                            )}
+                            {m.contenido && (
+                              <p className={`whitespace-pre-wrap wrap-break-word ${m.imagen_url ? 'px-3 py-2' : ''}`}>
+                                {m.contenido}
+                              </p>
+                            )}
                           </div>
                           <span
                             className={`text-xxs text-brand-muted mt-1 block px-1 ${
@@ -411,16 +458,32 @@ export default function MessagesPage() {
               >
                 <button
                   type="button"
-                  className="p-2.5 rounded-xl bg-[#111c33]/70 hover:bg-brand-card-hover/40 text-brand-muted hover:text-brand-text transition-colors border border-brand-border-dark/50 cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className={`p-2.5 rounded-xl bg-[#111c33]/70 hover:bg-brand-card-hover/40 text-brand-muted hover:text-brand-text transition-colors border border-brand-border-dark/50 cursor-pointer ${
+                    isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  <Paperclip className="w-5 h-5" />
+                  {isUploading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-brand-accent" />
+                  ) : (
+                    <Paperclip className="w-5 h-5" />
+                  )}
                 </button>
                 <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                />
+                <input
                   type="text"
-                  placeholder="Escribe un mensaje..."
+                  placeholder={isUploading ? "Subiendo foto..." : "Escribe un mensaje..."}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  className="flex-1 bg-[#111c33]/70 text-sm px-4.5 py-3 rounded-xl border border-brand-border-dark/60 focus:border-brand-accent focus:outline-none placeholder:text-brand-muted transition-colors text-brand-text"
+                  disabled={isUploading}
+                  className="flex-1 bg-[#111c33]/70 text-sm px-4.5 py-3 rounded-xl border border-brand-border-dark/60 focus:border-brand-accent focus:outline-none placeholder:text-brand-muted transition-colors text-brand-text disabled:opacity-50"
                 />
                 <button
                   type="submit"

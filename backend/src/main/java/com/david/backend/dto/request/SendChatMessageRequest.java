@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SendChatMessageRequest {
 
-    @NotBlank(message = "El mensaje no puede estar vacío.")
     private String contenido;
+    private String imagenUrl;
 }

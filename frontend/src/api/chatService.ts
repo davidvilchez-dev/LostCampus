@@ -24,6 +24,7 @@ export interface ChatMessage {
   remitente_nombre: string;
   remitente_foto_url: string | null;
   contenido: string;
+  imagen_url?: string | null;
   created_at: string;
 }
 
@@ -52,4 +53,19 @@ export async function getChatMessages(chatId: number): Promise<ChatMessage[]> {
 export async function confirmDelivery(chatId: number): Promise<ChatRoom> {
   const response = await axiosClient.post<ChatRoom>(`chats/${chatId}/confirmar`);
   return response.data;
+}
+
+/**
+ * Sube una imagen para el chat.
+ * POST /api/chats/upload
+ */
+export async function uploadChatImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await axiosClient.post<{ url: string }>('chats/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data.url;
 }

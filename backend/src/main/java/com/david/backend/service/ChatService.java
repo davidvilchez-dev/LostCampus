@@ -107,10 +107,18 @@ public class ChatService {
             throw new RuntimeException("Esta conversación está cerrada (modo solo lectura).");
         }
 
+        String txt = request.getContenido() != null ? request.getContenido().trim() : "";
+        String img = request.getImagenUrl() != null ? request.getImagenUrl().trim() : "";
+
+        if (txt.isEmpty() && img.isEmpty()) {
+            throw new IllegalArgumentException("El mensaje no puede estar vacío.");
+        }
+
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(room)
                 .remitente(usuario)
-                .contenido(request.getContenido().trim())
+                .contenido(txt)
+                .imagenUrl(img.isEmpty() ? null : img)
                 .build();
 
         chatMessageRepository.save(message);
@@ -126,10 +134,11 @@ public class ChatService {
         Usuario interlocutor = isCreator ? room.getReclamante() : room.getCreadorReporte();
 
         if (!subscriptionListener.isUserActiveInChat(interlocutor.getId(), roomId)) {
+            String notificationBody = txt.isEmpty() ? "[Imagen]" : txt;
             notificationService.crearNotificacion(
                     interlocutor,
                     "Nuevo mensaje de chat",
-                    usuario.getNombreCompleto() + ": " + message.getContenido(),
+                    usuario.getNombreCompleto() + ": " + notificationBody,
                     "CHAT_MENSAJE",
                     "/mensajes");
         }
@@ -204,6 +213,7 @@ public class ChatService {
                 .remitenteNombre(msg.getRemitente().getNombreCompleto())
                 .remitenteFotoUrl(msg.getRemitente().getFotoUrl())
                 .contenido(msg.getContenido())
+                .imagenUrl(msg.getImagenUrl())
                 .createdAt(msg.getCreatedAt())
                 .build();
     }
