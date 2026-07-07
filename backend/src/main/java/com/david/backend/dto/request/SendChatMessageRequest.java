@@ -1,6 +1,5 @@
 package com.david.backend.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +13,8 @@ public class SendChatMessageRequest {
 
     private String contenido;
     private String imagenUrl;
+
+    public SendChatMessageRequest(String contenido) {
+        this.contenido = contenido;
+    }
 }
