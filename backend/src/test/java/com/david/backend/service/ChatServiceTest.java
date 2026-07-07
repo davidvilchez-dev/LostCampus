@@ -313,8 +313,7 @@ public class ChatServiceTest {
                 eq("Nuevo mensaje de chat"),
                 eq("Usuario A: Hola reclamante desconectado"),
                 eq("CHAT_MENSAJE"),
-                eq("/mensajes")
-        );
+                eq("/mensajes"));
     }
 
     @Test
@@ -349,7 +348,6 @@ public class ChatServiceTest {
                 eq("Nuevo mensaje de chat"),
                 eq("Usuario B: Hola creador desconectado"),
                 eq("CHAT_MENSAJE"),
-                eq("/mensajes")
-        );
+                eq("/mensajes"));
     }
 }

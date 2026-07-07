@@ -4,13 +4,14 @@
 
 **Created**: 2026-07-01
 
-**Status**: Draft
+**Status**: Completado
 
 **Input**: User description: "Editar y eliminar reportes propios. Combinar HU-13 (Editar reportes activos) y HU-14 (Eliminar reportes propios) en un solo flujo."
 
 ## User Scenarios & Testing
 
 ### User Story 1 - Editar reporte propio activo (HU-13) (Priority: P1)
+
 Como usuario, quiero editar mis reportes de objetos perdidos o encontrados activos para corregir detalles, cambiar la categoría o actualizar la fecha/lugar del incidente.
 
 **Why this priority**: Permite corregir errores de dedo o complementar descripciones a medida que se obtiene más información sobre el objeto.
@@ -18,6 +19,7 @@ Como usuario, quiero editar mis reportes de objetos perdidos o encontrados activ
 **Independent Test**: Hacer clic en el botón de edición de una tarjeta de reporte propio en el panel de control o en su detalle, modificar campos en el formulario, guardar y validar que los cambios se reflejen en la vista del feed y del detalle.
 
 **Acceptance Scenarios**:
+
 1. **Given** que el usuario es autor del reporte y el reporte está activo, **When** accede a la página de edición `/reporte/:id/editar`, **Then** visualiza el formulario pre-rellenado con la información actual del reporte.
 2. **Given** que el usuario edita campos válidos y presiona "Guardar cambios", **When** se procesa la solicitud, **Then** el reporte se actualiza en base de datos y se muestra un mensaje de éxito en la UI.
 3. **Given** que el usuario intenta editar un reporte de otro usuario, **When** realiza la petición, **Then** el sistema retorna error `403 Forbidden` y no permite guardar los cambios.
@@ -26,6 +28,7 @@ Como usuario, quiero editar mis reportes de objetos perdidos o encontrados activ
 ---
 
 ### User Story 2 - Eliminar reporte propio (HU-14) (Priority: P1)
+
 Como usuario, quiero eliminar mis reportes para quitar publicaciones duplicadas, erróneas o que ya no desee que se muestren en la plataforma.
 
 **Why this priority**: Mantiene el feed limpio y libre de publicaciones basura o accidentales.
@@ -33,6 +36,7 @@ Como usuario, quiero eliminar mis reportes para quitar publicaciones duplicadas,
 **Independent Test**: Hacer clic en el botón "Eliminar" en una de las tarjetas en "Mis Reportes" o en el detalle, confirmar la acción, y comprobar que desaparece instantáneamente de la base de datos, del feed global y de la sección personal.
 
 **Acceptance Scenarios**:
+
 1. **Given** que el usuario es autor de la publicación, **When** hace clic en "Eliminar" y confirma la acción en el cuadro de diálogo, **Then** el reporte es eliminado de la base de datos y las imágenes asociadas se borran de Cloudinary.
 2. **Given** que el reporte es eliminado con éxito, **When** el usuario es redirigido a sus reportes, **Then** visualiza la lista actualizada sin la publicación eliminada y recibe una alerta toast de confirmación.
 3. **Given** que un usuario malintencionado intenta enviar una solicitud `DELETE /api/reports/{id}` sobre un reporte ajeno, **When** se ejecuta la solicitud en el backend, **Then** se retorna un código de error de autorización y el recurso no es eliminado.

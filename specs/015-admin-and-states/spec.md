@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-05
 
-**Status**: Draft
+**Status**: Completado
 
 **Input**: User stories detailing automatic report state management (HU-27), manual closing of reports by authors (HU-28), and the administration panel with audit logs (HU-29).
 
@@ -13,11 +13,13 @@
 ## User Scenarios & Testing
 
 ### User Story 1 - Gestión automática de estados de reportes (HU-27) (Priority: P1)
+
 Como usuario de LostCampus, quiero que el sistema gestione automáticamente los estados de mis reportes a lo largo de su ciclo de vida y mantenga un historial para tener trazabilidad completa.
 
 **Why this priority**: Asegura que el flujo de reportes, reclamos e intercambios mantenga estados coherentes sin requerir intervención manual constante.
 
 **Independent Test**:
+
 1. Crear un reporte y verificar que su estado inicial sea `ACTIVO`.
 2. Reclamar el reporte (lo cual crea e inicia el chat, cambiando el estado a `EN_PROCESO`).
 3. Rechazar la reclamación (o cancelarla) y verificar que regresa a `ACTIVO`.
@@ -25,6 +27,7 @@ Como usuario de LostCampus, quiero que el sistema gestione automáticamente los 
 5. Consultar el historial de cambios de estado y verificar el registro cronológico correcto.
 
 **Acceptance Scenarios**:
+
 1. **Given** que un usuario crea un nuevo reporte, **When** se inserta en base de datos, **Then** el estado inicial asignado es obligatoriamente `ACTIVO`.
 2. **Given** que un reporte está `ACTIVO`, **When** se acepta una solicitud de reclamación (o se inicia el chat de reclamo), **Then** el reporte pasa automáticamente a `EN_PROCESO`.
 3. **Given** que un reporte está `EN_PROCESO` debido a solicitudes iniciadas, **When** el propietario rechaza o se cancelan todas las solicitudes vinculadas, **Then** el reporte regresa automáticamente a estado `ACTIVO`.
@@ -34,17 +37,20 @@ Como usuario de LostCampus, quiero que el sistema gestione automáticamente los 
 ---
 
 ### User Story 2 - Cierre manual de reporte (HU-28) (Priority: P2)
+
 Como usuario autenticado que publicó un reporte, quiero poder cerrarlo manualmente si ya no es necesario (por ejemplo, si lo encontré por mis propios medios o ya no deseo buscarlo) para mantener limpio el feed principal.
 
 **Why this priority**: Permite a los usuarios depurar el catálogo de publicaciones activas sin necesidad de ayuda de soporte.
 
 **Independent Test**:
+
 1. Iniciar sesión y entrar al detalle de un reporte propio.
 2. Comprobar que aparece el botón "Cerrar reporte".
 3. Hacer clic, confirmar en el modal y comprobar que el reporte cambia a `CERRADO`.
 4. Verificar que ya no aparece en el feed principal y que las solicitudes pendientes se cancelan de forma automática.
 
 **Acceptance Scenarios**:
+
 1. **Given** que el usuario autenticado es el autor de un reporte en estado `ACTIVO` o `EN_PROCESO`, **When** visita la página de detalle, **Then** visualiza un botón de acción "Cerrar reporte".
 2. **Given** que el autor pulsa "Cerrar reporte", **When** se ejecuta la acción, **Then** se le solicita confirmación mediante un modal y, tras aceptar, el backend cambia el estado del reporte a `CERRADO` de forma permanente.
 3. **Given** que el reporte se cierra, **When** se finaliza la transacción, **Then** el sistema cancela/rechaza automáticamente todas las solicitudes de reclamación pendientes asociadas a dicho reporte.
@@ -54,11 +60,13 @@ Como usuario autenticado que publicó un reporte, quiero poder cerrarlo manualme
 ---
 
 ### User Story 3 - Módulo de administración y auditoría (HU-29) (Priority: P1)
+
 Como administrador de la plataforma, quiero acceder a un panel exclusivo para ver todos los reportes, cambiar sus estados o eliminarlos, registrando todas mis acciones en un log de auditoría para mantener el sitio moderado y seguro.
 
 **Why this priority**: Es la herramienta principal para la moderación de contenido y la resolución de incidentes o abusos en la plataforma.
 
 **Independent Test**:
+
 1. Iniciar sesión con una cuenta de administrador (`esAdmin = true`) y verificar la presencia del acceso al "Panel de Administración" en el Navbar/Sidebar.
 2. Ingresar al panel, ver la tabla de todos los reportes y filtrar por fecha, estado y tipo.
 3. Cambiar el estado de un reporte de un usuario de `ACTIVO` a `CERRADO` y verificar el cambio.
@@ -66,6 +74,7 @@ Como administrador de la plataforma, quiero acceder a un panel exclusivo para ve
 5. Consultar los logs de auditoría administrativa y verificar que el log registra al administrador, la acción, el reporte afectado, la fecha y hora.
 
 **Acceptance Scenarios**:
+
 1. **Given** un usuario con rol de administrador (`esAdmin = true`), **When** inicia sesión, **Then** visualiza el enlace de acceso exclusivo a la ruta `/admin` en el menú lateral. Un usuario común que intente entrar directamente a la ruta `/admin` debe ser bloqueado y redirigido.
 2. **Given** que el administrador ingresa al panel, **When** se carga la vista, **Then** ve un listado completo de todas las publicaciones del sistema con filtros de búsqueda por estado, tipo (PERDIDO/ENCONTRADO), usuario autor y fecha.
 3. **Given** un reporte seleccionado en la vista de administración, **When** el administrador decide cambiar su estado (ej: marcar como `CERRADO` o devolver a `ACTIVO`), **Then** la acción se realiza de forma inmediata y se genera un registro de auditoría.

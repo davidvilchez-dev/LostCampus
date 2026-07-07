@@ -4,13 +4,14 @@
 
 **Created**: 2026-07-01
 
-**Status**: Draft
+**Status**: Completado
 
 **Input**: User description: "Listar mis reportes (HU-15) y marcar reportes como recuperados (HU-16) en un solo flujo."
 
 ## User Scenarios & Testing
 
 ### User Story 1 - Listado de mis reportes (HU-15) (Priority: P1)
+
 Como usuario, quiero ver una pantalla privada con todas las publicaciones de objetos que he reportado (perdidos o encontrados) para poder realizar un seguimiento y administrarlos cómodamente.
 
 **Why this priority**: Es el panel de control necesario para que el usuario gestione sus reportes, vea su estado y realice ediciones o eliminaciones.
@@ -18,6 +19,7 @@ Como usuario, quiero ver una pantalla privada con todas las publicaciones de obj
 **Independent Test**: Ir a la barra lateral o al menú, hacer clic en "Mis Reportes" y verificar que carguen exclusivamente las publicaciones creadas por la cuenta activa actual.
 
 **Acceptance Scenarios**:
+
 1. **Given** que el usuario ha iniciado sesión y tiene reportes creados, **When** accede a la vista `/mis-reportes`, **Then** el sistema muestra una cuadrícula con todas sus publicaciones organizadas por fecha de creación (de más reciente a más antigua).
 2. **Given** que cada tarjeta en el listado muestra el objeto, categoría, lugar, fecha e imagen de portada, **When** se renderiza, **Then** incluye un badge distintivo del estado actual (`Activo` en azul, `Coincidencia Detectada` en naranja, `Cerrado` en gris).
 3. **Given** que el usuario es nuevo y no tiene reportes creados, **When** accede a `/mis-reportes`, **Then** visualiza un diseño de estado vacío ("Sin reportes registrados") con un botón directo para reportar su primer objeto.
@@ -25,6 +27,7 @@ Como usuario, quiero ver una pantalla privada con todas las publicaciones de obj
 ---
 
 ### User Story 2 - Marcar reporte como recuperado (HU-16) (Priority: P1)
+
 Como usuario, quiero poder marcar un objeto reportado como recuperado/resuelto cuando haya regresado a su dueño, cerrando la publicación de manera persistente.
 
 **Why this priority**: Es la conclusión natural del ciclo de vida de un objeto perdido y evita que la comunidad siga buscando o reclamando objetos que ya fueron entregados.
@@ -32,6 +35,7 @@ Como usuario, quiero poder marcar un objeto reportado como recuperado/resuelto c
 **Independent Test**: Hacer clic en el botón de confirmación (icono check) en una de las tarjetas de reportes activos en "Mis Reportes", verificar el cambio visual en la UI a "Cerrado" y comprobar que en el feed global se visualiza con el badge de "Recuperado".
 
 **Acceptance Scenarios**:
+
 1. **Given** que el usuario es autor de un reporte activo, **When** hace clic en el botón de marcar como resuelto (icono check), **Then** el sistema le pide confirmación, envía la petición al backend y cambia el estado del reporte a `CERRADO` persistiendo en la base de datos.
 2. **Given** que el reporte se marca exitosamente como `CERRADO`, **When** se recarga o se consulta el feed global, **Then** el reporte muestra claramente una etiqueta verde de éxito ("Recuperado").
 3. **Given** que un reporte se encuentra `CERRADO`, **When** se visualiza su detalle o tarjeta, **Then** se deshabilitan las opciones de edición y no se permiten abrir más coincidencias o reclamos.

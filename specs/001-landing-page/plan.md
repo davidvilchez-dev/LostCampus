@@ -1,7 +1,8 @@
 # Plan de Implementación: Landing Page (Página de Bienvenida)
 
 **Historias de Usuario**:
-- N/A (Estructura de Bienvenida e Inicio del Portal)
+
+- Hu-01: Como usuario de la universidad, quiero poder acceder a la página de bienvenida de LostCampus, para poder conocer sus funcionalidades y servicios.
 
 ## 1. Objetivo
 

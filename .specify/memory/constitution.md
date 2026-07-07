@@ -1,24 +1,3 @@
-<!--
-Sync Impact Report:
-- Version change: [INITIAL] → 1.0.0
-- List of modified principles:
-  - Added: I. Decoupled Architecture
-  - Added: II. Service Testing Rigor
-  - Added: III. Quality Gates (95% Coverage)
-  - Added: IV. REST Integration Testing
-  - Added: V. Cloud-Native Storage
-  - Added: VI. Security-First Auth (JWT)
-- Added sections: Development Methodology, Technical Constraints
-- Removed sections: N/A
-- Templates requiring updates:
-  - ✅ updated: .specify/templates/plan-template.md
-  - ✅ updated: .specify/templates/spec-template.md
-  - ✅ updated: .specify/templates/tasks-template.md
-  - ✅ updated: .specify/extensions/agent-context/README.md
-  - ✅ updated: .specify/extensions/agent-context/commands/speckit.agent-context.update.md
-- Follow-up TODOs: N/A
--->
-
 # LostCampus Constitution
 
 ## Core Principles
