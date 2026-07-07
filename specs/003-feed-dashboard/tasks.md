@@ -1,6 +1,7 @@
 # Tareas de Implementación: Feed de Reportes (Muro Principal)
 
 **Historias de Usuario**:
+
 - `HU-09` Feed de reportes
 - `HU-10` Búsqueda de reportes
 
@@ -9,6 +10,7 @@
 ---
 
 ## Fase 1: Componentes del Panel (Sidebar & Layout)
+
 - `[x]` Crear la estructura base del componente `Sidebar.tsx`.
 - `[x]` Integrar el logotipo oficial con tipografía y enlaces consistentes en `Sidebar`.
 - `[x]` Configurar el mapeo de enlaces del menú con iconos de Lucide (Inicio, Crear reporte, etc.).
@@ -22,6 +24,7 @@
 - `[x]` Añadir una redirección automática a la pantalla de acceso si el usuario no tiene sesión en `DashboardLayout`.
 
 ## Fase 2: Componentes del Feed (ReportCard)
+
 - `[x]` Crear la estructura base del componente `ReportCard.tsx`.
 - `[x]` Diseñar el contenedor de imagen del objeto con zoom interactivo al hacer hover.
 - `[x]` Configurar la etiqueta flotante de estado ("Perdido" o "Encontrado") con colores y animación.
@@ -31,6 +34,7 @@
 - `[x]` Configurar el efecto de brillo e iluminación en los bordes de la tarjeta al hacer hover.
 
 ## Fase 3: Página del Feed y Filtros (FeedPage)
+
 - `[x]` Crear la estructura base de la página `FeedPage.tsx`.
 - `[x]` Diseñar el bloque del encabezado de la sección con título y descripción del feed.
 - `[x]` Agregar el botón destacado "+ Nuevo reporte" con redirección al formulario de creación.
@@ -45,10 +49,12 @@
 - `[x]` Diseñar una sección visual para cuando los filtros aplicados no devuelvan ningún reporte.
 
 ## Fase 4: Enrutamiento y Conexión
+
 - `[x]` Importar `DashboardLayout` y `FeedPage` en el archivo de enrutamiento principal `App.tsx`.
 - `[x]` Configurar la ruta `/feed` como ruta protegida hija de `DashboardLayout`.
 
 ## Fase 5: Pruebas de Calidad, Responsividad y Accesibilidad
+
 - `[x]` Validar en navegador que la ruta `/feed` redirija a `/login` si no hay sesión activa.
 - `[x]` Verificar que al escribir en el buscador local, la lista de tarjetas y el contador se actualicen instantáneamente en pantalla.
 - `[x]` Verificar que los filtros combinados (buscador + dropdown categoría) funcionen correctamente en sincronía.
@@ -56,3 +62,7 @@
 - `[x]` Validar la responsividad de las tarjetas en resoluciones móviles, tablets y escritorio.
 - `[x]` Comprobar la navegación interna sin provocar recargas completas de la página HTML en todos los links del Sidebar.
 - `[x]` Verificar la legibilidad y contraste del texto claro sobre el fondo oscuro en las tarjetas y barra de filtros.
+
+/plan
+/spec
+/tasks

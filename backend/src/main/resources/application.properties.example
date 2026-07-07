@@ -34,3 +34,16 @@ server.port=8080
 
 # Jackson Naming Strategy
 spring.jackson.property-naming-strategy=SNAKE_CASE
+
+# CORS Configuration
+# Comma-separated list of allowed frontend origins.
+app.cors.allowed-origins=http://localhost:5173
+
+# Mail Configuration (Supports Gmail TLS/STARTTLS on 587, or Mailtrap, etc.)
+spring.mail.host=YOUR_MAIL_HOST
+spring.mail.port=587
+spring.mail.username=YOUR_MAIL_USERNAME
+spring.mail.password=YOUR_MAIL_PASSWORD
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.ssl.enable=false
